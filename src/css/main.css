@@ -1,0 +1,34 @@
+.mdl-button--fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    padding-top: 24px;
+    margin-bottom: 0;
+    z-index: 998;
+}
+
+.search-icon {
+    float: right;
+}
+
+mdl-textfield__input {
+    padding: 20px;
+}
+
+#map { 
+    height: 100%; 
+}
+
+mdl-layout__content {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
