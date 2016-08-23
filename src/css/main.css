@@ -19,7 +19,7 @@ mdl-textfield__input {
     height: 100%; 
 }
 
-mdl-layout__content {
+.contentArea {
     height: 100%;
     width: 100%;
     margin: 0;
