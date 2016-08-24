@@ -18,7 +18,7 @@
             <header class="mdl-layout__header">
                 <div class="mdl-layout-icon"></div>
                 <div class="mdl-layout__header-row">
-                    <span class="mdl-layout__title">Simple Layout</span>
+                    <span class="mdl-layout__title" data-bind="text: personName"></span>
                     <div class="mdl-layout-spacer"></div>
                     <nav class="mdl-navigation">
                         <a class="mdl-navigation__link" href="#">Nav link 1</a>
@@ -47,4 +47,6 @@
             </main>
         </div>
     </body>
+
+    <script>ko.applyBindings(myViewModel);</script>
 </html>
