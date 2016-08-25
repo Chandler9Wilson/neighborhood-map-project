@@ -2,21 +2,24 @@ var gulp        = require('gulp');
 var browsersync = require('browser-sync').create('dev');
 var config      = require('../../config').development.browsersync;
 
-/*var dev = browsersync.create('dev');*/
-
+//initializes a dev branch of the server
 gulp.task('browsersync', [], function() {
     browsersync.init(config);
 });
 
+//the rest of the tasks here are for reloads during development
+//the reloads would not work in seperate files for some reason?
 gulp.task('lint-watch', ['lint'], function (done) {
     browsersync.reload();
     done();
 });
 
-/*gulp.task('browsersync', [], function() {
-    dev.init({
-        server: ['./src/']
-    });
+gulp.task('styles-watch', ['lintCSS'], function (done) {
+    browsersync.reload();
+    done();
+});
 
-    gulp.watch('src/*.html').on('change', browsersync.reload);
-});*/
+gulp.task('html-watch', [], function (done) {
+    browsersync.reload();
+    done();
+});

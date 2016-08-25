@@ -1,5 +1,7 @@
 var devAssets = 'src';
 var devScripts = 'src/js/**/*.js';
+var devStyles = 'src/css/**/*.css';
+var devHTML = 'src/**/*.html';
 var development = '';
 
 module.exports = {
@@ -11,11 +13,15 @@ module.exports = {
             port: 9999
         },
         watch: {
-            scripts: {devScripts},
-            styles: {}
+            scripts: devScripts,
+            styles: devStyles,
+            html: devHTML
         },
         lint: {
             src: devScripts
+        },
+        lintCSS: {
+            src: devStyles
         }
     }
 }
