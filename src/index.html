@@ -7,21 +7,24 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
         <link rel="stylesheet" href="css/main.css">
         <!--scripts todo sort out async etc...-->
+        <!--<script data-main="js/entry" src="js/require.js"></script>-->
         <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
         <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
+        <script src="js/models/location.js"></script>
         <script src="js/main.js"></script>
-
-         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap" async defer></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap&libraries=places" async defer></script>
     </head>
     <body>
         <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
             <header class="mdl-layout__header">
                 <div class="mdl-layout-icon"></div>
                 <div class="mdl-layout__header-row">
-                    <span class="mdl-layout__title" data-bind="text: personName"></span>
+                    <div data-bind="with: person">
+                        <span class="mdl-layout__title" data-bind="text: personName"></span>
+                    </div>
                     <div class="mdl-layout-spacer"></div>
                     <nav class="mdl-navigation">
-                        <a class="mdl-navigation__link" href="#">Nav link 1</a>
+                        <a class="mdl-navigation__link" href="#">Nav link 2</a>
                         <a class="mdl-navigation__link" href="#">Nav link 2</a>
                         <a class="mdl-navigation__link" href="#">Nav link 3</a>
                     </nav>
@@ -33,11 +36,11 @@
                     <input class="mdl-textfield__input" type="text" id="sample3">
                     <label class="mdl-textfield__label" for="sample3"><i class="material-icons search-icon">search</i></label>
                 </div>
-                <nav class="mdl-navigation">
-                    <a class="mdl-navigation__link" href="#">Nav link 2</a>
-                    <a class="mdl-navigation__link" href="#">Nav link 2</a>
-                    <a class="mdl-navigation__link" href="#">Nav link 3</a>
-                </nav>
+                <div data-bind="with: locationArray">
+                        <nav class="mdl-navigation" data-bind="foreach: locationArray">
+                            <a class="mdl-navigation__link" href="#" data-bind="text: name"></a>
+                        </nav>
+                </div>
             </div>
             <main class="mdl-layout__content contentArea">
                 <div id="map"></div>
@@ -48,5 +51,5 @@
         </div>
     </body>
 
-    <script>ko.applyBindings(myViewModel);</script>
+    <script>ko.applyBindings(viewModel);</script>
 </html>

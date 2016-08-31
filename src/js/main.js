@@ -1,9 +1,11 @@
 var map;
 
 function initMap() {
+    var lat = mapArea.lat;
+    var lng = mapArea.lng;
     map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 40.7413549, lng: -73.99802439999996},
-        zoom: 13
+        center: {lat, lng},
+        zoom: 14
     });
     var tribeca = {lat: 40.719526, lng: -74.0089934};
     var marker = new google.maps.Marker({
@@ -19,7 +21,38 @@ function initMap() {
     });
 }
 
-var myViewModel = {
-    personName: ko.observable('Bob'),
-    personAge: ko.observable(123)
+var locationArrray = ko.observableArray([
+    { name: 'helloWorld' }
+]);
+
+//todo add a more complete map area with state machine
+var mapArea = {
+    lat: 30.284301,
+    lng: -97.74473390000001
 };
+
+var viewModel = function() {
+    this.person = {
+        personName: ko.observable('Bob'),
+        personAge: ko.observable(123)
+    };
+    this.locationArray = ko.observableArray([
+        { name: 'helloWorld' },
+        { name: 'apartment' }
+    ]);
+};
+
+/*ViewModel.prototype.area = function(nickname, address) {
+
+};*/
+
+/*ViewModel.prototype.locationArray = function() {
+
+};*/
+
+var model = {
+
+};
+
+
+
