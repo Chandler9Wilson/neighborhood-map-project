@@ -3,6 +3,7 @@ var runSequence = require('run-sequence');
 var ngrok = require('ngrok').site;
 var debug = require('gulp-debug');
 
+//todo add jslint for production build
 gulp.task('build:production', function(callback) {
     runSequence('clean',
         'optimize-main',
