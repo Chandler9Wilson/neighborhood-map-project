@@ -1,3 +1,5 @@
+//todo add modular loading with require js http://knockoutjs.com/documentation/amd-loading.html
+
 //map init and starting coords
 //todo update to be based on state machine and add markers dynamically
 var map;
@@ -24,17 +26,81 @@ function initMap() {
     marker.addListener('click', function() {
         infowindow.open(map, marker);
     });
+    var autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')));
+        autocomplete.bindTo('bounds', map);
+    autocomplete.addListener('place_changed', function() {
+          infowindow.close();  //closes the autocomplete suggestions
+          marker.setVisible(false);
+          var place = autocomplete.getPlace();
+          console.log(place);
+          if (!place.geometry) {
+            window.alert("Autocomplete's returned place contains no geometry");
+            return;
+          }
+
+          // If the place has a geometry, then present it on a map.
+          if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+          } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);  // Why 17? Because it looks good.
+          }
+          marker.setIcon(/** @type {google.maps.Icon} */({
+            url: place.icon,
+            size: new google.maps.Size(71, 71),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(17, 34),
+            scaledSize: new google.maps.Size(35, 35)
+          }));
+          marker.setPosition(place.geometry.location);
+          marker.setVisible(true);
+
+          var address = '';
+          if (place.address_components) {
+            address = [
+              (place.address_components[0] && place.address_components[0].short_name || ''),
+              (place.address_components[1] && place.address_components[1].short_name || ''),
+              (place.address_components[2] && place.address_components[2].short_name || '')
+            ].join(' ');
+          }
+
+          infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+          infowindow.open(map, marker);
+        });
 }
+
+//todo fix autocomplete suggestions not showing should be related to this
+//http://stackoverflow.com/questions/10957781/google-maps-autocomplete-result-in-bootstrap-modal-dialog
+//https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
+/*function initAutocomplete() {*/
+    // Create the autocomplete object, restricting the search to geographical
+    // location types.
+    /*autocomplete = new google.maps.places.Autocomplete(*/
+        /** @type {!HTMLInputElement} *//*(document.getElementById('address')),*/
+        /*{types: ['geocode']});*/
+
+    // When the user selects an address from the dropdown, populate the address
+    // fields in the form.
+    //autocomplete.addListener('place_changed');
+    
+/*    var place = autocomplete.getPlace();
+    if(place !== undefined) {
+        console.log(place);
+        viewModel.newArea.newAreaAddress = place;
+        console.log(viewModel.newArea.newAreaAddress);
+    }
+}*/
 
 var mapArea = {
     lat: 30.284301,
     lng: -97.74473390000001
 };
 
+var viewModel = function() {
 //start: machines
 
     //start: state machine
-    var currentState = {
+    this.currentState = {
         coords: {
             lat: undefined,
             lng: undefined
@@ -44,7 +110,7 @@ var mapArea = {
         selectedLocation: undefined
     };
 
-    var stateMachine = function(newState) {
+    this.stateMachine = function(newState) {
         if(newState.type === area) {
             mapCenter = newState.coords;
 
@@ -52,22 +118,42 @@ var mapArea = {
     };
     //end: state machine
 
-    //start: newArea
-    var newArea = function() {
-        var counter = 0;
-
+    //start: newArea 
+    this.newArea = function(dialogState) {
+        this.counter = 0;
+        this.newAreaAddress = ko.observable;
+        this.newAreaNickname = ko.observable();
+        
+        console.log("newArea");
+        switch (dialogState) {
+            case 'showModal':
+                dialog.showModal();
+                break;
+            case 'closeModal':
+                dialog.close();
+                break;
+            case 'submit':
+                //todo add validation possibly with jquery plugin https://jqueryvalidation.org/
+                console.log(newArea.newAreaAddress);
+                console.log(newArea.newAreaNickname);
+                break;
+            default:
+                //todo add error message on screen
+                console.log('error in dialogState');
+        }
+        console.log(dialogState);
     };
     //end: newArea
 
     //start: newLocation
-    var newLocation = function(address, nickname) {
-        var counter = 0;
-        var newlocationName = ('userLocation' + counter);
+    this.newLocation = function(address, nickname) {
+        this.counter = 0;
+        this.newlocationName = ('newLocation' + counter);
 
 
         //newMarker
             //todo https://developers.google.com/maps/documentation/javascript/markers
-        counter = counter + 1;
+        this.counter = counter + 1;
     };
     //end: newLocation
 
@@ -75,9 +161,11 @@ var mapArea = {
 
 //start: observable arrays
     //todo to update from json in model http://knockoutjs.com/documentation/json-data.html
-    var allAreas = ko.observableArray([]);
+    this.allAreas = ko.observableArray([]);
     //todo to push to json to model http://knockoutjs.com/documentation/json-data.html
 //end: observable arrays
+
+};
 
 //start: classes
 

@@ -21,9 +21,9 @@
             <header class="mdl-layout__header">
                 <div class="mdl-layout-icon"></div>
                 <div class="mdl-layout__header-row">
-                    <div data-bind="with: person">
+                    <!--todo <div data-bind="with: person">
                         <span class="mdl-layout__title" data-bind="text: personName"></span>
-                    </div>
+                    </div>-->
                     <div class="mdl-layout-spacer"></div>
                     <nav class="mdl-navigation">
                         <a class="mdl-navigation__link" href="#">Nav link 2</a>
@@ -35,7 +35,7 @@
                         <i class="material-icons">more_vert</i>
                     </button>
                     <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
-                        <li class="mdl-menu__item">Some Action</li>
+                        <li class="mdl-menu__item" data-bind="click: function() { newArea('showModal') }">New Area</li>
                         <li class="mdl-menu__item">Another Action</li>
                         <li disabled class="mdl-menu__item">Disabled Action</li>
                         <li class="mdl-menu__item">Yet Another Action</li>
@@ -48,11 +48,11 @@
                     <input class="mdl-textfield__input" type="text" id="sample3">
                     <label class="mdl-textfield__label" for="sample3"><i class="material-icons search-icon">search</i></label>
                 </div>
-                <div data-bind="with: locationArray">
+                <!--todo <div data-bind="with: locationArray">
                         <nav class="mdl-navigation" data-bind="foreach: locationArray">
                             <a class="mdl-navigation__link" href="#" data-bind="text: name"></a>
                         </nav>
-                </div>
+                </div>-->
             </div>
             <main class="mdl-layout__content contentArea">
                 <div id="map"></div>
@@ -61,6 +61,26 @@
                 </button>
             </main>
         </div>
+        <dialog id="dialog" class="mdl-dialog">
+            <h3 class="mdl-dialog__title">New Area</h3>
+            <div class="mdl-dialog__content">
+                <form id="newAreaForm" method="get" data-bind="submit: function() { newArea('submit') }">
+                    <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <input class="mdl-textfield__input" type="text" id="address" data-bind="value: newArea.newAreaAddress">
+                        <label class="mdl-textfield__label" for="address"></label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.newAreaNickname">
+                        <label class="mdl-textfield__label" for="nickname">Nickname...</label>
+                    </div>
+                </form>
+            </div>
+            <div class="mdl-dialog__actions">
+                <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
+                <button type="button" class="mdl-button" data-bind="click: function() { newArea('closeModal') }">Cancel</button>
+            </div>
+        </dialog>
     </body>
 
     <script>ko.applyBindings(viewModel);</script>

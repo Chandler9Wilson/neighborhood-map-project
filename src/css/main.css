@@ -26,6 +26,14 @@ mdl-textfield__input {
     padding: 0;
 }
 
+.pac-container {
+    z-index: 1051 !important;
+}
+
+dialog {
+    z-index: 20;
+}
+
 html, body {
     margin: 0;
     padding: 0;
