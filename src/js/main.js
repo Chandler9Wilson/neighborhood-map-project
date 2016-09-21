@@ -26,48 +26,7 @@ function initMap() {
     marker.addListener('click', function() {
         infowindow.open(map, marker);
     });
-    var autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')));
-        autocomplete.bindTo('bounds', map);
-    autocomplete.addListener('place_changed', function() {
-          infowindow.close();  //closes the autocomplete suggestions
-          marker.setVisible(false);
-          var place = autocomplete.getPlace();
-          console.log(place);
-          if (!place.geometry) {
-            window.alert("Autocomplete's returned place contains no geometry");
-            return;
-          }
-
-          // If the place has a geometry, then present it on a map.
-          if (place.geometry.viewport) {
-            map.fitBounds(place.geometry.viewport);
-          } else {
-            map.setCenter(place.geometry.location);
-            map.setZoom(17);  // Why 17? Because it looks good.
-          }
-          marker.setIcon(/** @type {google.maps.Icon} */({
-            url: place.icon,
-            size: new google.maps.Size(71, 71),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(17, 34),
-            scaledSize: new google.maps.Size(35, 35)
-          }));
-          marker.setPosition(place.geometry.location);
-          marker.setVisible(true);
-
-          var address = '';
-          if (place.address_components) {
-            address = [
-              (place.address_components[0] && place.address_components[0].short_name || ''),
-              (place.address_components[1] && place.address_components[1].short_name || ''),
-              (place.address_components[2] && place.address_components[2].short_name || '')
-            ].join(' ');
-          }
-
-          infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
-          infowindow.open(map, marker);
-        });
-}
+}   
 
 //todo fix autocomplete suggestions not showing should be related to this
 //http://stackoverflow.com/questions/10957781/google-maps-autocomplete-result-in-bootstrap-modal-dialog
@@ -90,6 +49,30 @@ function initMap() {
         console.log(viewModel.newArea.newAreaAddress);
     }
 }*/
+var place;
+
+function initAutocomplete(type) {
+    //var self = this;
+    //self.place = undefined;
+
+    if(type === 'area') {
+        var autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')));
+            autocomplete.bindTo('bounds', map);
+            autocomplete.addListener('place_changed', function() {
+                //infowindow.close();  //closes the autocomplete suggestions
+                //marker.setVisible(false);
+                place = autocomplete.getPlace();
+                console.log(place);
+            });
+    }else if(type === 'location') {
+
+    }else if(type === 'address') {
+        return place;
+    }else {
+        console.log('error in initAutocomplete');
+    }
+    console.log(place);
+}
 
 var mapArea = {
     lat: 30.284301,
@@ -107,7 +90,9 @@ var viewModel = function() {
         },
         zoom: undefined,
         selectedArea: undefined,
-        selectedLocation: undefined
+        selectedLocation: undefined,
+        locationModal: undefined,
+        areaModal: undefined
     };
 
     this.stateMachine = function(newState) {
@@ -120,30 +105,57 @@ var viewModel = function() {
 
     //start: newArea 
     this.newArea = function(dialogState) {
-        this.counter = 0;
-        this.newAreaAddress = ko.observable;
-        this.newAreaNickname = ko.observable();
+        var self = this;
+        self.counter = 0;
+        self.newName = ('newArea' + counter);
         
+        self.nickname = ko.observable();
         console.log("newArea");
         switch (dialogState) {
             case 'showModal':
                 dialog.showModal();
+                initAutocomplete('area');
                 break;
             case 'closeModal':
                 dialog.close();
                 break;
             case 'submit':
                 //todo add validation possibly with jquery plugin https://jqueryvalidation.org/
-                console.log(newArea.newAreaAddress);
-                console.log(newArea.newAreaNickname);
+                //grab location details by calling initAutocomplete.place?
+                self.areaDetails = place;
+                console.log( initAutocomplete('address'));
+                console.log(newArea.nickname, place);
+
+                //new object
+                var obj = {};
+                obj[self.newName] = new Area(self.nickname, self.newName);
+                areaArray.push(obj);
+                //self.newName.gMaps.push(self.areaDetails); //push google places json data to the gmaps array todo rename to more intuitive name
+                //allAreas.push(self.newName); //push the new Area to the allAreas observableArray
+                dialog.close();
                 break;
             default:
                 //todo add error message on screen
                 console.log('error in dialogState');
         }
         console.log(dialogState);
+        self.counter = self.counter + 1;
     };
     //end: newArea
+
+    this.areaArray = ko.observableArray ([
+        { default: new Area('Austin') }
+    ]);
+
+    this.areaNames = ko.observableArray ([]);
+
+    //start: subscribe functions
+    areaArrray.subscribe(function(changes) {
+        //todo delete all contents of areaNames http://stackoverflow.com/questions/18638507/how-to-clear-contents-of-an-observablearray-that-was-populated-from-previous-vis
+        //todo run query function looking for nicknames in each object in the areaArrray
+        //above similiar to http://stackoverflow.com/questions/14149551/subscribe-to-observable-array-for-new-or-removed-entry-only
+    })
+    //end: subscribe functions
 
     //start: newLocation
     this.newLocation = function(address, nickname) {
@@ -184,24 +196,14 @@ var viewModel = function() {
     };
 
     //this is the class for most of our view models to be created
-    var Area = function() {
-        this.person = {
-            personName: ko.observable('Bob'),
-            personAge: ko.observable(123)
-        };
-        this.locationArray = ko.observableArray([
-            { name: 'helloWorld' },
-            { name: 'apartment' }
-        ]);
+    var Area = function(nickname, generatedName) {
+        this.nickname = nickname;
+        this.generatedName = generatedName;
     };
 
-    Area.prototype.area = function(nickname, address) {
+    Area.prototype.gMaps = [];
 
-    };
-
-    Area.prototype.locationArray = function() {
-
-    };
+    Area.prototype.locations = ko.observableArray([]);
 
 //end: classes
 

@@ -25,11 +25,11 @@
                         <span class="mdl-layout__title" data-bind="text: personName"></span>
                     </div>-->
                     <div class="mdl-layout-spacer"></div>
-                    <nav class="mdl-navigation">
-                        <a class="mdl-navigation__link" href="#">Nav link 2</a>
-                        <a class="mdl-navigation__link" href="#">Nav link 2</a>
-                        <a class="mdl-navigation__link" href="#">Nav link 3</a>
-                    </nav>
+                    <div data-bind="with: areaArray">
+                        <nav class="mdl-navigation" data-bind="foreach: areaArray">
+                            <a class="mdl-navigation__link" href="#" data-bind="text: nickname"></a>
+                        </nav>
+                    </div>
                     <!--<div class="mdl-layout-spacer"></div>-->
                     <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
                         <i class="material-icons">more_vert</i>
@@ -67,11 +67,11 @@
                 <form id="newAreaForm" method="get" data-bind="submit: function() { newArea('submit') }">
                     <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
                     <div class="mdl-textfield mdl-js-textfield">
-                        <input class="mdl-textfield__input" type="text" id="address" data-bind="value: newArea.newAreaAddress">
+                        <input class="mdl-textfield__input" type="text" id="address">
                         <label class="mdl-textfield__label" for="address"></label>
                     </div>
                     <div class="mdl-textfield mdl-js-textfield">
-                        <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.newAreaNickname">
+                        <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.nickname">
                         <label class="mdl-textfield__label" for="nickname">Nickname...</label>
                     </div>
                 </form>
