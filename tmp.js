@@ -40,3 +40,5 @@ var autocomplete = new google.maps.places.Autocomplete((document.getElementById(
           infowindow.open(map, marker);
         });
 }
+
+ko.toJSON($data, null, 2)

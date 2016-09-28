@@ -80,6 +80,7 @@ var mapArea = {
 };
 
 var viewModel = function() {
+    var self = this;
 //start: machines
 
     //start: state machine
@@ -105,11 +106,11 @@ var viewModel = function() {
 
     //start: newArea 
     this.newArea = function(dialogState) {
-        var self = this;
-        self.counter = 0;
-        self.newName = ('newArea' + counter);
+        var self2 = this;
+        self2.counter = 0;
+        self2.newName = ('newArea' + counter);
         
-        self.nickname = ko.observable();
+        self2.nickname = ko.observable();
         console.log("newArea");
         switch (dialogState) {
             case 'showModal':
@@ -122,14 +123,18 @@ var viewModel = function() {
             case 'submit':
                 //todo add validation possibly with jquery plugin https://jqueryvalidation.org/
                 //grab location details by calling initAutocomplete.place?
-                self.areaDetails = place;
+                self2.areaDetails = place;
                 console.log( initAutocomplete('address'));
                 console.log(newArea.nickname, place);
 
                 //new object
                 var obj = {};
-                obj[self.newName] = new Area(self.nickname, self.newName);
-                areaArray.push(obj);
+                obj[self2.newName] = new Area(self2.nickname(), self2.newName);
+                console.log(obj);
+                //console.log(ko.toJSON(areaArray));
+                areaArray().push(obj);
+                console.log('areaArray', areaArray());
+                areaArray.valueHasMutated();
                 //self.newName.gMaps.push(self.areaDetails); //push google places json data to the gmaps array todo rename to more intuitive name
                 //allAreas.push(self.newName); //push the new Area to the allAreas observableArray
                 dialog.close();
@@ -139,22 +144,65 @@ var viewModel = function() {
                 console.log('error in dialogState');
         }
         console.log(dialogState);
-        self.counter = self.counter + 1;
+        self2.counter = self.counter + 1;
     };
     //end: newArea
 
+    var defaultArea = new Area('Austin', 'default');
+
     this.areaArray = ko.observableArray ([
-        { default: new Area('Austin') }
+        { default: defaultArea },
     ]);
+
+    console.log(this.areaArray()[0]['default'].nickname);
+    console.log(Object.keys(areaArray()[0])[0]);
 
     this.areaNames = ko.observableArray ([]);
 
+    //loops through the areaArray to find the names of each instance of Area
+    var findAreaNames = function() {
+        var areaLength = this.areaArray().length;
+
+        for(var i = 0; i < areaLength; i++) {
+            //this finds the first key in an object and returns it
+            var areaName = Object.keys(areaArray()[i])[0];
+
+            var obj = {};
+            obj['name'] = areaName;
+            obj['index'] = i;
+            areaNames.push(obj); 
+        }
+    };
+
+    findAreaNames();
+    console.log('areaNames', self.areaNames());
+
+    self.itemNumber = function(index) {
+        return index + 1;
+    };
+
+    this.areaNickname = function() {
+        //areaArray[areaName[$index].index][areaName[$index.name]].nickname
+        //var areaIndex = areaNames()[areaNameIndex].index;
+        //var areaName = areaNames()[areaNameIndex].name;
+        console.log(index);
+        var context = ko.contextFor(event.target);
+
+        //var nicknameCall = self.areaArray()
+        var nicknameCall = self.areaArray()[self.areaNames()[context.$index()].index][self.areaNames()[context.$index()].name].nickname;//areaArray[areaIndex][areaName].nickname;
+        console.log(nicknameCall);
+        return nicknameCall;
+    };
+
     //start: subscribe functions
-    areaArrray.subscribe(function(changes) {
-        //todo delete all contents of areaNames http://stackoverflow.com/questions/18638507/how-to-clear-contents-of-an-observablearray-that-was-populated-from-previous-vis
+    this.areaArray.subscribe(function(changes) {
+        //deletes contents of areaNames
+        self.areaNames.removeAll();
+
+        findAreaNames();
         //todo run query function looking for nicknames in each object in the areaArrray
         //above similiar to http://stackoverflow.com/questions/14149551/subscribe-to-observable-array-for-new-or-removed-entry-only
-    })
+    });
     //end: subscribe functions
 
     //start: newLocation
@@ -187,13 +235,7 @@ var viewModel = function() {
         this.nickname = nickname;
     };
 
-    Location.prototype.geocode = function(address) {
-        var apiKey = 'AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM';
-        var completedURL = 
-        $.getJSON('https://maps.googleapis.com/maps/api/geocode/json?', function(address) {
-
-        });
-    };
+    Location.prototype.gMaps = [];
 
     //this is the class for most of our view models to be created
     var Area = function(nickname, generatedName) {
@@ -210,6 +252,8 @@ var viewModel = function() {
 var model = {
     //todo for converting from observables to json http://knockoutjs.com/documentation/json-data.html
 };
+
+ko.applyBindings(viewModel);
 
 
 
