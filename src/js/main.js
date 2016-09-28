@@ -90,16 +90,24 @@ var viewModel = function() {
             lng: undefined
         },
         zoom: undefined,
-        selectedArea: undefined,
+        selectedArea: 'Austin',
         selectedLocation: undefined,
         locationModal: undefined,
         areaModal: undefined
     });
 
-    self.stateMachine = function(newState) {
-        if(newState.type === area) {
-            mapCenter = newState.coords;
-
+    self.stateMachine = function(changedState, data) {
+        switch (changedState) {
+            case 'selectedArea':
+                break;
+            case 'selectedLocation':
+                break;
+            case 'locationModal':
+                break;
+            case 'areaModal':
+                break;
+            default:
+                console.log('error in stateMachine');
         }
     };
     //end: state machine
@@ -129,10 +137,10 @@ var viewModel = function() {
 
                 //new object
                 var obj = {};
-                obj[self2.newName] = new Area(self2.nickname(), self2.newName);
+                obj[self2.newName] = new Area(newArea.nickname, self2.newName);
                 console.log(obj);
                 //console.log(ko.toJSON(areaArray));
-                areaArray().push(obj);
+                areaArray.push(obj);
                 console.log('areaArray', areaArray());
                 areaArray.valueHasMutated();
                 //self.newName.gMaps.push(self.areaDetails); //push google places json data to the gmaps array todo rename to more intuitive name
