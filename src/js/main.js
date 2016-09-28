@@ -84,7 +84,7 @@ var viewModel = function() {
 //start: machines
 
     //start: state machine
-    this.currentState = {
+    self.currentState = ko.observable ({
         coords: {
             lat: undefined,
             lng: undefined
@@ -94,9 +94,9 @@ var viewModel = function() {
         selectedLocation: undefined,
         locationModal: undefined,
         areaModal: undefined
-    };
+    });
 
-    this.stateMachine = function(newState) {
+    self.stateMachine = function(newState) {
         if(newState.type === area) {
             mapCenter = newState.coords;
 
@@ -105,7 +105,7 @@ var viewModel = function() {
     //end: state machine
 
     //start: newArea 
-    this.newArea = function(dialogState) {
+    self.newArea = function(dialogState) {
         var self2 = this;
         self2.counter = 0;
         self2.newName = ('newArea' + counter);
@@ -150,14 +150,14 @@ var viewModel = function() {
 
     var defaultArea = new Area('Austin', 'default');
 
-    this.areaArray = ko.observableArray ([
+    self.areaArray = ko.observableArray ([
         { default: defaultArea },
     ]);
 
-    console.log(this.areaArray()[0]['default'].nickname);
+    console.log(self.areaArray()[0]['default'].nickname);
     console.log(Object.keys(areaArray()[0])[0]);
 
-    this.areaNames = ko.observableArray ([]);
+    self.areaNames = ko.observableArray ([]);
 
     //loops through the areaArray to find the names of each instance of Area
     var findAreaNames = function() {
@@ -181,7 +181,7 @@ var viewModel = function() {
         return index + 1;
     };
 
-    this.areaNickname = function() {
+    self.areaNickname = function() {
         //areaArray[areaName[$index].index][areaName[$index.name]].nickname
         //var areaIndex = areaNames()[areaNameIndex].index;
         //var areaName = areaNames()[areaNameIndex].name;
@@ -195,7 +195,7 @@ var viewModel = function() {
     };
 
     //start: subscribe functions
-    this.areaArray.subscribe(function(changes) {
+    self.areaArray.subscribe(function(changes) {
         //deletes contents of areaNames
         self.areaNames.removeAll();
 
@@ -206,7 +206,7 @@ var viewModel = function() {
     //end: subscribe functions
 
     //start: newLocation
-    this.newLocation = function(address, nickname) {
+    self.newLocation = function(address, nickname) {
         this.counter = 0;
         this.newlocationName = ('newLocation' + counter);
 
@@ -221,7 +221,7 @@ var viewModel = function() {
 
 //start: observable arrays
     //todo to update from json in model http://knockoutjs.com/documentation/json-data.html
-    this.allAreas = ko.observableArray([]);
+    self.allAreas = ko.observableArray([]);
     //todo to push to json to model http://knockoutjs.com/documentation/json-data.html
 //end: observable arrays
 
