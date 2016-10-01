@@ -24,16 +24,15 @@
                         <span class="mdl-layout__title" data-bind="text: personName"></span>
                     </div>-->
                     <div class="mdl-layout-spacer"></div>
-                    <!--<span data-bind="text: $root.itemNumber($index())"></span>-->
-                    <nav class="mdl-navigation" data-bind="foreach: areaNames">
-                        <a class="mdl-navigation__link" href="#" data-bind="text: ko.toJSON($data, null, 2), click: function() { stateMachine('selectedArea', $index) }"></a>
+                    <nav class="mdl-navigation">
+                        <a class="mdl-navigation__link" href="#"></a>
                     </nav>
                     <!--<div class="mdl-layout-spacer"></div>-->
                     <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
                         <i class="material-icons">more_vert</i>
                     </button>
                     <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
-                        <li class="mdl-menu__item" data-bind="click: function() { stateMachine('areaModal', true) }">New Area</li>
+                        <li class="mdl-menu__item">New Area</li>
                         <li class="mdl-menu__item">Another Action</li>
                         <li disabled class="mdl-menu__item">Disabled Action</li>
                         <li class="mdl-menu__item">Yet Another Action</li>
@@ -41,19 +40,19 @@
                 </div>
             </header>
             <div class="mdl-layout__drawer">
-                <span class="mdl-layout__title" data-bind="text: currentState.selectedArea"></span>
+                <span class="mdl-layout__title"></span>
                 <!--todo add filter functionality possibly like this http://www.knockmeout.net/2011/04/utility-functions-in-knockoutjs.html-->
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                     <input class="mdl-textfield__input" type="text" id="sample3">
                     <label class="mdl-textfield__label" for="sample3"><i class="material-icons search-icon">search</i></label>
                 </div>
-                <nav class="mdl-navigation" data-bind="foreach: currentState.selectedArea.locations">
-                    <a class="mdl-navigation__link" href="#" data-bind="text: name, click: function() { stateMachine('selectedLocation', $index) }"></a>
+                <nav class="mdl-navigation">
+                    <a class="mdl-navigation__link" href="#"></a>
                 </nav>
             </div>
             <main class="mdl-layout__content contentArea">
                 <div id="map"></div>
-                <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-button--raised" data-bind="click: function() { stateMachine('locationModal', true) }">
+                <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-button--raised">
                     <i class="material-icons">add</i>
                 </button>
             </main>
@@ -63,7 +62,7 @@
         <dialog id="newArea" class="mdl-dialog">
             <h3 class="mdl-dialog__title">New Area</h3>
             <div class="mdl-dialog__content">
-                <form id="newAreaForm" method="get" data-bind="submit: function() { newArea('submit') }">
+                <form id="newAreaForm" method="get">
                     <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
                     <div class="mdl-textfield mdl-js-textfield">
                         <input class="mdl-textfield__input" type="text" id="address">
@@ -77,13 +76,13 @@
             </div>
             <div class="mdl-dialog__actions">
                 <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
-                <button type="button" class="mdl-button" data-bind="click: function() { newArea('closeModal') }">Cancel</button>
+                <button type="button" class="mdl-button">Cancel</button>
             </div>
         </dialog>
         <dialog id="newLocation" class="mdl-dialog">
             <h3 class="mdl-dialog__title">New Location</h3>
             <div class="mdl-dialog__content">
-                <form id="newAreaForm" method="get" data-bind="submit: function() { newArea('submit') }">
+                <form id="newAreaForm" method="get">
                     <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
                     <div class="mdl-textfield mdl-js-textfield">
                         <input class="mdl-textfield__input" type="text" id="address">
@@ -97,12 +96,11 @@
             </div>
             <div class="mdl-dialog__actions">
                 <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
-                <button type="button" class="mdl-button" data-bind="click: function() { newArea('closeModal') }">Cancel</button>
+                <button type="button" class="mdl-button">Cancel</button>
             </div>
         </dialog>
 
         <script src="js/main.js"></script>
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap&libraries=places"></script>
-        <!--<script>ko.applyBindings(viewModel);</script>-->   
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap&libraries=places"></script> 
     </body>
 </html>
