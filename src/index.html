@@ -58,7 +58,9 @@
                 </button>
             </main>
         </div>
-        <dialog id="dialog" class="mdl-dialog">
+
+        <!--start various modals-->
+        <dialog id="newArea" class="mdl-dialog">
             <h3 class="mdl-dialog__title">New Area</h3>
             <div class="mdl-dialog__content">
                 <form id="newAreaForm" method="get" data-bind="submit: function() { newArea('submit') }">
@@ -78,6 +80,27 @@
                 <button type="button" class="mdl-button" data-bind="click: function() { newArea('closeModal') }">Cancel</button>
             </div>
         </dialog>
+        <dialog id="newLocation" class="mdl-dialog">
+            <h3 class="mdl-dialog__title">New Location</h3>
+            <div class="mdl-dialog__content">
+                <form id="newAreaForm" method="get" data-bind="submit: function() { newArea('submit') }">
+                    <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <input class="mdl-textfield__input" type="text" id="address">
+                        <label class="mdl-textfield__label" for="address"></label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.nickname">
+                        <label class="mdl-textfield__label" for="nickname">Nickname...</label>
+                    </div>
+                </form>
+            </div>
+            <div class="mdl-dialog__actions">
+                <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
+                <button type="button" class="mdl-button" data-bind="click: function() { newArea('closeModal') }">Cancel</button>
+            </div>
+        </dialog>
+
         <script src="js/main.js"></script>
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap&libraries=places"></script>
         <!--<script>ko.applyBindings(viewModel);</script>-->   

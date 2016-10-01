@@ -83,35 +83,6 @@ var viewModel = function() {
     var self = this;
 //start: machines
 
-    //start: state machine
-    self.currentState = ko.observable ({
-        coords: {
-            lat: undefined,
-            lng: undefined
-        },
-        zoom: undefined,
-        selectedArea: 'Austin',
-        selectedLocation: undefined,
-        locationModal: undefined,
-        areaModal: undefined
-    });
-
-    self.stateMachine = function(changedState, data) {
-        switch (changedState) {
-            case 'selectedArea':
-                break;
-            case 'selectedLocation':
-                break;
-            case 'locationModal':
-                break;
-            case 'areaModal':
-                break;
-            default:
-                console.log('error in stateMachine');
-        }
-    };
-    //end: state machine
-
     //start: newArea 
     self.newArea = function(dialogState) {
         var self2 = this;
@@ -122,11 +93,11 @@ var viewModel = function() {
         console.log("newArea");
         switch (dialogState) {
             case 'showModal':
-                dialog.showModal();
+                newArea.showModal();
                 initAutocomplete('area');
                 break;
             case 'closeModal':
-                dialog.close();
+                newArea.close();
                 break;
             case 'submit':
                 //todo add validation possibly with jquery plugin https://jqueryvalidation.org/
@@ -224,6 +195,36 @@ var viewModel = function() {
         this.counter = counter + 1;
     };
     //end: newLocation
+
+    //start: state machine
+    self.currentState = ko.observable ({
+        coords: {
+            lat: undefined,
+            lng: undefined
+        },
+        zoom: undefined,
+        selectedArea: self[areaArray()[0]],
+        selectedLocation: undefined,
+        locationModal: undefined,
+        areaModal: undefined
+    });
+
+    self.stateMachine = function(changedState, data) {
+        switch (changedState) {
+            case 'selectedArea':
+                //todo areaArray[areaNames[data].index]
+                break;
+            case 'selectedLocation':
+                break;
+            case 'locationModal':
+                break;
+            case 'areaModal':
+                break;
+            default:
+                console.log('error in stateMachine');
+        }
+    };
+    //end: state machine
 
 //end: machines
 
