@@ -10,19 +10,13 @@
         <!--todo add this polyfill for dialog support in other browsers https://github.com/GoogleChrome/dialog-polyfill-->
         <!--scripts todo sort out async etc...-->
         <!--<script data-main="js/entry" src="js/require.js"></script>-->
-        <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
-        <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-        <script src="js/models/location.js"></script>
     </head>
     <body>
         <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
             <header class="mdl-layout__header">
                 <div class="mdl-layout-icon"></div>
                 <div class="mdl-layout__header-row">
-                    <!--todo <div data-bind="with: person">
-                        <span class="mdl-layout__title" data-bind="text: personName"></span>
-                    </div>-->
+                    <span class="mdl-layout__title">Austin</span>
                     <div class="mdl-layout-spacer"></div>
                     <nav class="mdl-navigation">
                         <a class="mdl-navigation__link" href="#"></a>
@@ -46,8 +40,8 @@
                     <input class="mdl-textfield__input" type="text" id="sample3">
                     <label class="mdl-textfield__label" for="sample3"><i class="material-icons search-icon">search</i></label>
                 </div>
-                <nav class="mdl-navigation">
-                    <a class="mdl-navigation__link" href="#"></a>
+                <nav class="mdl-navigation" data-bind="foreach: locationArray">
+                    <a class="mdl-navigation__link" href="#" data-bind="text: $data.nickname"></a>
                 </nav>
             </div>
             <main class="mdl-layout__content contentArea">
@@ -100,6 +94,9 @@
             </div>
         </dialog>
 
+        <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+        <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
         <script src="js/main.js"></script>
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap&libraries=places"></script> 
     </body>
