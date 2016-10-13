@@ -38,7 +38,8 @@ var mapArea = {
 
 var allMarkers = [];
 
-//sets up displayed markers based on filteredLocations
+//todo move into ViewModel
+//displays markers based on filteredLocations
 var setMarkers = function() {
     setMapOnAll(null);
 
@@ -71,6 +72,16 @@ var ViewModel = function() {
     /*var allAreas = ko.observableArray([
         {'default': new Area()}
     ]);*/
+
+    self.mapFocus = function(newLocation) {
+        if(newLocation === 'Austin') {
+            map.setZoom(14);
+            map.setCenter(mapArea);
+        } else {
+            map.setZoom(15);
+            map.setCenter(newLocation.address.geometry.location);
+        }
+    };
 
     //stores all locations
     self.locationArray = ko.observableArray([]);
