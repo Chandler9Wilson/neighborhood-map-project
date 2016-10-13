@@ -1,103 +1,106 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!--css-->
-        <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.indigo-pink.min.css">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-        <link rel="stylesheet" href="css/main.css">
-        <!--todo add this polyfill for dialog support in other browsers https://github.com/GoogleChrome/dialog-polyfill-->
-        <!--scripts todo sort out async etc...-->
-        <!--<script data-main="js/entry" src="js/require.js"></script>-->
-    </head>
-    <body>
-        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
-            <header class="mdl-layout__header">
-                <div class="mdl-layout-icon"></div>
-                <div class="mdl-layout__header-row">
-                    <span class="mdl-layout__title">Austin</span>
-                    <div class="mdl-layout-spacer"></div>
-                    <nav class="mdl-navigation">
-                        <a class="mdl-navigation__link" href="#"></a>
-                    </nav>
-                    <!--<div class="mdl-layout-spacer"></div>-->
-                    <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--css-->
+    <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="css/main.css">
+    <!--todo add this polyfill for dialog support in other browsers https://github.com/GoogleChrome/dialog-polyfill-->
+    <!--scripts todo sort out async etc...-->
+    <!--<script data-main="js/entry" src="js/require.js"></script>-->
+</head>
+
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout-icon"></div>
+            <div class="mdl-layout__header-row">
+                <span class="mdl-layout__title">Austin</span>
+                <div class="mdl-layout-spacer"></div>
+                <nav class="mdl-navigation">
+                    <a class="mdl-navigation__link" href="#"></a>
+                </nav>
+                <!--<div class="mdl-layout-spacer"></div>-->
+                <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
                         <i class="material-icons">more_vert</i>
                     </button>
-                    <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
-                        <li class="mdl-menu__item">New Area</li>
-                        <li class="mdl-menu__item">Another Action</li>
-                        <li disabled class="mdl-menu__item">Disabled Action</li>
-                        <li class="mdl-menu__item">Yet Another Action</li>
-                    </ul>
-                </div>
-            </header>
-            <div class="mdl-layout__drawer">
-                <span class="mdl-layout__title"></span>
-                <!--todo add filter functionality possibly like this http://www.knockmeout.net/2011/04/utility-functions-in-knockoutjs.html-->
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                    <input class="mdl-textfield__input" type="text" id="sample3">
-                    <label class="mdl-textfield__label" for="sample3"><i class="material-icons search-icon">search</i></label>
-                </div>
-                <nav class="mdl-navigation" data-bind="foreach: locationArray">
-                    <a class="mdl-navigation__link" href="#" data-bind="text: $data.nickname"></a>
-                </nav>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
+                    <li class="mdl-menu__item">New Area</li>
+                    <li class="mdl-menu__item">Another Action</li>
+                    <li disabled class="mdl-menu__item">Disabled Action</li>
+                    <li class="mdl-menu__item">Yet Another Action</li>
+                </ul>
             </div>
-            <main class="mdl-layout__content contentArea">
-                <div id="map"></div>
-                <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-button--raised">
+        </header>
+        <div class="mdl-layout__drawer">
+            <span class="mdl-layout__title"></span>
+            <!--todo add filter functionality possibly like this http://www.knockmeout.net/2011/04/utility-functions-in-knockoutjs.html-->
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <input class="mdl-textfield__input" type="text" id="filter" data-bind="textInput: filter">
+                <label class="mdl-textfield__label" for="filter"><i class="material-icons search-icon">search</i></label>
+            </div>
+            <nav class="mdl-navigation" data-bind="foreach: filteredLocations">
+                <a class="mdl-navigation__link" href="#" data-bind="text: $data.nickname"></a>
+            </nav>
+        </div>
+        <main class="mdl-layout__content contentArea">
+            <div id="map"></div>
+            <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-button--raised">
                     <i class="material-icons">add</i>
                 </button>
-            </main>
+        </main>
+    </div>
+
+    <!--start various modals-->
+    <dialog id="newArea" class="mdl-dialog">
+        <h3 class="mdl-dialog__title">New Area</h3>
+        <div class="mdl-dialog__content">
+            <form id="newAreaForm" method="get">
+                <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="address">
+                    <label class="mdl-textfield__label" for="address"></label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.nickname">
+                    <label class="mdl-textfield__label" for="nickname">Nickname...</label>
+                </div>
+            </form>
         </div>
+        <div class="mdl-dialog__actions">
+            <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
+            <button type="button" class="mdl-button">Cancel</button>
+        </div>
+    </dialog>
+    <dialog id="newLocation" class="mdl-dialog">
+        <h3 class="mdl-dialog__title">New Location</h3>
+        <div class="mdl-dialog__content">
+            <form id="newAreaForm" method="get">
+                <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="address">
+                    <label class="mdl-textfield__label" for="address"></label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.nickname">
+                    <label class="mdl-textfield__label" for="nickname">Nickname...</label>
+                </div>
+            </form>
+        </div>
+        <div class="mdl-dialog__actions">
+            <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
+            <button type="button" class="mdl-button">Cancel</button>
+        </div>
+    </dialog>
 
-        <!--start various modals-->
-        <dialog id="newArea" class="mdl-dialog">
-            <h3 class="mdl-dialog__title">New Area</h3>
-            <div class="mdl-dialog__content">
-                <form id="newAreaForm" method="get">
-                    <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
-                    <div class="mdl-textfield mdl-js-textfield">
-                        <input class="mdl-textfield__input" type="text" id="address">
-                        <label class="mdl-textfield__label" for="address"></label>
-                    </div>
-                    <div class="mdl-textfield mdl-js-textfield">
-                        <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.nickname">
-                        <label class="mdl-textfield__label" for="nickname">Nickname...</label>
-                    </div>
-                </form>
-            </div>
-            <div class="mdl-dialog__actions">
-                <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
-                <button type="button" class="mdl-button">Cancel</button>
-            </div>
-        </dialog>
-        <dialog id="newLocation" class="mdl-dialog">
-            <h3 class="mdl-dialog__title">New Location</h3>
-            <div class="mdl-dialog__content">
-                <form id="newAreaForm" method="get">
-                    <!--todo add input validation https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Data_form_validation-->
-                    <div class="mdl-textfield mdl-js-textfield">
-                        <input class="mdl-textfield__input" type="text" id="address">
-                        <label class="mdl-textfield__label" for="address"></label>
-                    </div>
-                    <div class="mdl-textfield mdl-js-textfield">
-                        <input class="mdl-textfield__input" type="text" id="nickname" data-bind="value: newArea.nickname">
-                        <label class="mdl-textfield__label" for="nickname">Nickname...</label>
-                    </div>
-                </form>
-            </div>
-            <div class="mdl-dialog__actions">
-                <button type="button submit" form="newAreaForm" class="mdl-button">Submit</button>
-                <button type="button" class="mdl-button">Cancel</button>
-            </div>
-        </dialog>
+    <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="js/main.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap&libraries=places"></script>
+</body>
 
-        <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
-        <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-        <script src="js/main.js"></script>
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArF3-K7mHN56mOyALKYD0bsPaiYfWYaeM&callback=initMap&libraries=places"></script> 
-    </body>
 </html>

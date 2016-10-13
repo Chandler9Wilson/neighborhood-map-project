@@ -38,6 +38,8 @@ var mapArea = {
 //Main view model
 var ViewModel = function() {
     var self = this;
+
+    self.filter = ko.observable('');
     //todo add current object and state machine
 
     //todo implement areas
@@ -45,6 +47,7 @@ var ViewModel = function() {
         {'default': new Area()}
     ]);*/
 
+    //stores all locations
     self.locationArray = ko.observableArray([]);
 
     //function called when a location is being added
@@ -56,6 +59,27 @@ var ViewModel = function() {
         //push the newLocation to locationArray 
         self.locationArray.push(obj);
     };
+
+    self.stringStartsWith = function(string, startsWith) {
+        string = string || "";
+        if (startsWith.length > string.length)
+            return false;
+        return string.substring(0, startsWith.length) === startsWith;
+    };
+
+    self.filteredLocations = ko.computed(function() {
+        var filter = self.filter().toLowerCase();
+
+        if (!filter) {
+            return self.locationArray();
+        } else {
+            return ko.utils.arrayFilter(self.locationArray(), function(Location) {
+                return self.stringStartsWith(Location.nickname.toLowerCase(), filter);
+            });
+        }
+    });
+
+
 };
 
 //location class used within viewmodel
@@ -64,6 +88,29 @@ var Location = function(address) {
     this.address = address;
 };
 
+//either pulls defaults for new user, or a previous users info from $localStorage
+var init = function() {
+    var defaultLocations = [{
+            'nickname': 'Jimmy Johns',
+            'address': {}
+        },
+        {
+            'nickname': 'Art Museum',
+            'address': {}
+        },
+        {
+            'nickname': 'Park',
+            'address': {}
+        }
+    ];
+
+    for (var i = 0; i < defaultLocations.length; i++) {
+        vm.locationArray.push(defaultLocations[i]);
+    }
+};
+
 var vm = new ViewModel();
 
 ko.applyBindings(vm);
+
+init();
