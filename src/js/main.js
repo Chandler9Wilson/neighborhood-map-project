@@ -74,7 +74,7 @@ var ViewModel = function() {
     ]);*/
 
     self.mapFocus = function(newLocation) {
-        if(newLocation === 'Austin') {
+        if (newLocation === 'Austin') {
             map.setZoom(14);
             map.setCenter(mapArea);
         } else {
@@ -96,12 +96,9 @@ var ViewModel = function() {
         self.locationArray.push(obj);
     };
 
-    //compares a string to another partial string
-    self.stringStartsWith = function(string, startsWith) {
+    self.stringContains = function(string, contains) {
         string = string || "";
-        if (startsWith.length > string.length)
-            return false;
-        return string.substring(0, startsWith.length) === startsWith;
+        return string.includes(contains);
     };
 
     //computed observable to filter locations based on user input
@@ -112,7 +109,7 @@ var ViewModel = function() {
             return self.locationArray();
         } else {
             return ko.utils.arrayFilter(self.locationArray(), function(Location) {
-                return self.stringStartsWith(Location.nickname.toLowerCase(), filter);
+                return self.stringContains(Location.nickname.toLowerCase(), filter);
             });
         }
     });
