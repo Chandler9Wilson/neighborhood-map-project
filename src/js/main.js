@@ -3,6 +3,7 @@
 //map init and starting coords
 //todo update to be based on state machine and add markers dynamically
 var map;
+var infowindow;
 
 //this initializes the google map on the page to load async
 function initMap() {
@@ -15,18 +16,7 @@ function initMap() {
             //https://developers.google.com/maps/documentation/javascript/controls#Adding_Controls_to_the_Map
             //todo change the map space to change on rezise so that 15% of map is not off screen on desktop
     });
-    var tribeca = { lat: 40.719526, lng: -74.0089934 };
-    var marker = new google.maps.Marker({
-        position: tribeca,
-        map: map,
-        title: 'tribeca'
-    });
-    var infowindow = new google.maps.InfoWindow({
-        content: 'la;sdkfjl;asdfj'
-    });
-    marker.addListener('click', function() {
-        infowindow.open(map, marker);
-    });
+    infowindow = new google.maps.InfoWindow();
     onMapLoad();
 }
 
@@ -34,31 +24,6 @@ function initMap() {
 var mapArea = {
     lat: 30.284301,
     lng: -97.74473390000001
-};
-
-var allMarkers = [];
-
-//todo move into ViewModel
-//displays markers based on filteredLocations
-var setMarkers = function() {
-    setMapOnAll(null);
-
-    allMarkers = [];
-
-    for (var i = 0; i < vm.filteredLocations().length; i++) {
-        var marker = new google.maps.Marker({
-            position: vm.filteredLocations()[i].address.geometry.location,
-            map: map,
-            title: vm.filteredLocations()[i].nickname
-        });
-        allMarkers.push(marker);
-    }
-
-    function setMapOnAll(map) {
-        for (var i = 0; i < allMarkers.length; i++) {
-            allMarkers[i].setMap(map);
-        }
-    }
 };
 
 //Main view model
@@ -96,6 +61,7 @@ var ViewModel = function() {
         self.locationArray.push(obj);
     };
 
+    //compares two strings and returns true if any part matchs
     self.stringContains = function(string, contains) {
         string = string || "";
         return string.includes(contains);
@@ -116,8 +82,44 @@ var ViewModel = function() {
 
     //tells setMarkers to update when filteredLocations changes
     self.filteredLocations.subscribe(function(newValue) {
-        setMarkers();
+        self.setMarkers();
     });
+
+    var allMarkers = [];
+
+    //displays markers based on filteredLocations
+    self.setMarkers = function() {
+        setMapOnAll(null);
+
+        allMarkers = [];
+
+        //called within a for loop to create a closure
+        var createMarker = function(location) {
+            var marker = new google.maps.Marker({
+                position: location.address.geometry.location,
+                map: map,
+                title: location.nickname
+            });
+            //I have no idea why this solution worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
+            google.maps.event.addListener(marker, 'click', function() {
+                var bs = 'bullshit';
+                infowindow.setContent(bs);
+                infowindow.open(map, marker);
+            });
+            //marker.addListener('click', setInfoWindow(marker));
+            allMarkers.push(marker);
+        };
+
+        for (var i = 0; i < vm.filteredLocations().length; i++) {
+            createMarker(vm.filteredLocations()[i]);
+        }
+
+        function setMapOnAll(map) {
+            for (var i = 0; i < allMarkers.length; i++) {
+                allMarkers[i].setMap(map);
+            }
+        }
+    };
 };
 
 //location class used within viewmodel
@@ -376,6 +378,8 @@ var init = function() {
 
 var vm = new ViewModel();
 
+//when map loads applys bindings and calls init allows google to be used in viewmodel
+//potentially a better way to do this?
 var onMapLoad = function() {
     ko.applyBindings(vm);
 
