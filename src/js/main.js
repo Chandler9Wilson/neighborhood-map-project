@@ -3,266 +3,234 @@
 //map init and starting coords
 //todo update to be based on state machine and add markers dynamically
 var map;
+var infowindow;
 
+//this initializes the google map on the page to load async
 function initMap() {
     var lat = mapArea.lat;
     var lng = mapArea.lng;
     map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat, lng},
+        center: { lat, lng },
         zoom: 14
-        //todo change control defaults to prevent interference with new location button
+            //todo change control defaults to prevent interference with new location button
             //https://developers.google.com/maps/documentation/javascript/controls#Adding_Controls_to_the_Map
-        //todo change the map space to change on rezise so that 15% of map is not off screen on desktop
+            //todo change the map space to change on rezise so that 15% of map is not off screen on desktop
     });
-    var tribeca = {lat: 40.719526, lng: -74.0089934};
-    var marker = new google.maps.Marker({
-        position: tribeca,
-        map: map,
-        title: 'tribeca'
-    });
-    var infowindow= new google.maps.InfoWindow({
-        content: 'la;sdkfjl;asdfj'
-    });
-    marker.addListener('click', function() {
-        infowindow.open(map, marker);
-    });
-}   
-
-//todo fix autocomplete suggestions not showing should be related to this
-//http://stackoverflow.com/questions/10957781/google-maps-autocomplete-result-in-bootstrap-modal-dialog
-//https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
-/*function initAutocomplete() {*/
-    // Create the autocomplete object, restricting the search to geographical
-    // location types.
-    /*autocomplete = new google.maps.places.Autocomplete(*/
-        /** @type {!HTMLInputElement} *//*(document.getElementById('address')),*/
-        /*{types: ['geocode']});*/
-
-    // When the user selects an address from the dropdown, populate the address
-    // fields in the form.
-    //autocomplete.addListener('place_changed');
-    
-/*    var place = autocomplete.getPlace();
-    if(place !== undefined) {
-        console.log(place);
-        viewModel.newArea.newAreaAddress = place;
-        console.log(viewModel.newArea.newAreaAddress);
-    }
-}*/
-var place;
-
-function initAutocomplete(type) {
-    //var self = this;
-    //self.place = undefined;
-
-    if(type === 'area') {
-        var autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')));
-            autocomplete.bindTo('bounds', map);
-            autocomplete.addListener('place_changed', function() {
-                //infowindow.close();  //closes the autocomplete suggestions
-                //marker.setVisible(false);
-                place = autocomplete.getPlace();
-                console.log(place);
-            });
-    }else if(type === 'location') {
-
-    }else if(type === 'address') {
-        return place;
-    }else {
-        console.log('error in initAutocomplete');
-    }
-    console.log(place);
+    infowindow = new google.maps.InfoWindow();
+    initVM();
 }
 
+//initial map area used in initMap
 var mapArea = {
     lat: 30.284301,
     lng: -97.74473390000001
 };
 
-var viewModel = function() {
+//Main view model
+var ViewModel = function() {
     var self = this;
-//start: machines
 
-    //start: newArea 
-    self.newArea = function(dialogState) {
-        var self2 = this;
-        self2.counter = 0;
-        self2.newName = ('newArea' + counter);
-        
-        self2.nickname = ko.observable();
-        console.log("newArea");
-        switch (dialogState) {
-            case 'showModal':
-                newArea.showModal();
-                initAutocomplete('area');
-                break;
-            case 'closeModal':
-                newArea.close();
-                break;
-            case 'submit':
-                //todo add validation possibly with jquery plugin https://jqueryvalidation.org/
-                //grab location details by calling initAutocomplete.place?
-                self2.areaDetails = place;
-                console.log( initAutocomplete('address'));
-                console.log(newArea.nickname, place);
+    self.filter = ko.observable('');
+    //stores all locations
+    self.locationArray = ko.observableArray([]);
 
-                //new object
-                var obj = {};
-                obj[self2.newName] = new Area(newArea.nickname, self2.newName);
-                console.log(obj);
-                //console.log(ko.toJSON(areaArray));
-                areaArray.push(obj);
-                console.log('areaArray', areaArray());
-                areaArray.valueHasMutated();
-                //self.newName.gMaps.push(self.areaDetails); //push google places json data to the gmaps array todo rename to more intuitive name
-                //allAreas.push(self.newName); //push the new Area to the allAreas observableArray
-                dialog.close();
-                break;
-            default:
-                //todo add error message on screen
-                console.log('error in dialogState');
-        }
-        console.log(dialogState);
-        self2.counter = self.counter + 1;
+    //used for temporary storage of markers
+    self.allMarkers = [];
+
+    //todo add current object and state machine
+
+    //todo implement areas
+    /*var allAreas = ko.observableArray([
+        {'default': new Area()}
+    ]);*/
+
+    //todo add snackbar alerts for items not loading
+    //https://getmdl.io/components/index.html#snackbar-section
+    //https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
+    //todo add website tour http://github.hubspot.com/shepherd/docs/welcome/
+    self.alert = function() {
+
     };
-    //end: newArea
 
-    var defaultArea = new Area('Austin', 'default');
-
-    self.areaArray = ko.observableArray ([
-        { default: defaultArea },
-    ]);
-
-    console.log(self.areaArray()[0]['default'].nickname);
-    console.log(Object.keys(areaArray()[0])[0]);
-
-    self.areaNames = ko.observableArray ([]);
-
-    //loops through the areaArray to find the names of each instance of Area
-    var findAreaNames = function() {
-        var areaLength = this.areaArray().length;
-
-        for(var i = 0; i < areaLength; i++) {
-            //this finds the first key in an object and returns it
-            var areaName = Object.keys(areaArray()[i])[0];
-
-            var obj = {};
-            obj['name'] = areaName;
-            obj['index'] = i;
-            areaNames.push(obj); 
+    self.mapFocus = function(newLocation) {
+        if (newLocation === 'Austin') {
+            map.setZoom(14);
+            map.setCenter(mapArea);
+        } else {
+            map.setZoom(15);
+            map.setCenter(newLocation.address.geometry.location);
         }
     };
 
-    findAreaNames();
-    console.log('areaNames', self.areaNames());
-
-    self.itemNumber = function(index) {
-        return index + 1;
-    };
-
-    self.areaNickname = function() {
-        //areaArray[areaName[$index].index][areaName[$index.name]].nickname
-        //var areaIndex = areaNames()[areaNameIndex].index;
-        //var areaName = areaNames()[areaNameIndex].name;
-        console.log(index);
-        var context = ko.contextFor(event.target);
-
-        //var nicknameCall = self.areaArray()
-        var nicknameCall = self.areaArray()[self.areaNames()[context.$index()].index][self.areaNames()[context.$index()].name].nickname;//areaArray[areaIndex][areaName].nickname;
-        console.log(nicknameCall);
-        return nicknameCall;
-    };
-
-    //start: subscribe functions
-    self.areaArray.subscribe(function(changes) {
-        //deletes contents of areaNames
-        self.areaNames.removeAll();
-
-        findAreaNames();
-        //todo run query function looking for nicknames in each object in the areaArrray
-        //above similiar to http://stackoverflow.com/questions/14149551/subscribe-to-observable-array-for-new-or-removed-entry-only
-    });
-    //end: subscribe functions
-
-    //start: newLocation
+    //function called when a location is being added
     self.newLocation = function(address, nickname) {
-        this.counter = 0;
-        this.newlocationName = ('newLocation' + counter);
+        var obj = {};
+        obj['nickname'] = nickname;
+        obj['placeInfo'] = new Location(address);
 
-
-        //newMarker
-            //todo https://developers.google.com/maps/documentation/javascript/markers
-        this.counter = counter + 1;
+        //push the newLocation to locationArray 
+        self.locationArray.push(obj);
     };
-    //end: newLocation
 
-    //start: state machine
-    self.currentState = ko.observable ({
-        coords: {
-            lat: undefined,
-            lng: undefined
-        },
-        zoom: undefined,
-        selectedArea: self[areaArray()[0]],
-        selectedLocation: undefined,
-        locationModal: undefined,
-        areaModal: undefined
+    //gets foursquare data for infowindow
+    self.getFoursquare = function(location) {
+        var url;
+        var urlArray = [];
+
+        var venuesSearch = 'https://api.foursquare.com/v2/venues/search';
+        var client_id = 'client_id=1XFTFIOZPBXBW2LAFUBE3IQSVXPNOOWQJXFX0N5JUUTVORF5';
+        //how to hide or not use this since this app is client side only atm?
+        var client_secret = 'client_secret=DAV55HOOCPAE4LVQY34K3RIHMRSUF4H15XD4GG0UZ4CF2L4N';
+        var near = location.address.formatted_address.replace(/\s+/g, '+'); //'near=Austin,+TX';
+        //replaces spaces with + for url friendly format
+        //var query = location.address.formatted_address.replace(/\s+/g, '+');
+        var intent = 'intent=match';
+        var version = 'v=20140806';
+        var model = 'm=foursquare';
+
+        urlArray.push(venuesSearch, client_id, client_secret, near, version, model);
+
+        help.assembleUrl();
+        help.sendRequest();
+    };
+
+    //computed observable to filter locations based on user input
+    self.filteredLocations = ko.computed(function() {
+        var filter = self.filter().toLowerCase();
+
+        if (!filter) {
+            return self.locationArray();
+        } else {
+            return ko.utils.arrayFilter(self.locationArray(), function(Location) {
+                return help.stringContains(Location.nickname.toLowerCase(), filter);
+            });
+        }
     });
 
-    self.stateMachine = function(changedState, data) {
-        switch (changedState) {
-            case 'selectedArea':
-                //todo areaArray[areaNames[data].index]
-                break;
-            case 'selectedLocation':
-                break;
-            case 'locationModal':
-                break;
-            case 'areaModal':
-                break;
-            default:
-                console.log('error in stateMachine');
+    //tells setMarkers to update when filteredLocations changes
+    self.filteredLocations.subscribe(function(newValue) {
+        self.setMarkers();
+    });
+
+    //displays markers based on filteredLocations
+    self.setMarkers = function() {
+        setMapOnAll(null);
+
+        allMarkers = [];
+
+        //called within a for loop to create a closure
+        var createMarker = function(location, indexOf) {
+            var marker = new google.maps.Marker({
+                position: location.ll,
+                map: map,
+                title: location.nickname,
+                indexOf: indexOf
+            });
+            //I have no idea why this solution worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
+            google.maps.event.addListener(marker, 'click', function() {
+                var title = marker.title;
+                infowindow.setContent();
+                infowindow.open(map, marker);
+            });
+            //marker.addListener('click', setInfoWindow(marker));
+            allMarkers.push(marker);
+        };
+
+        for (var i = 0; i < vm.filteredLocations().length; i++) {
+            createMarker(vm.filteredLocations()[i], i);
+        }
+
+        function setMapOnAll(map) {
+            for (var i = 0; i < self.allMarkers.length; i++) {
+                self.allMarkers[i].setMap(map);
+            }
         }
     };
-    //end: state machine
-
-//end: machines
-
-//start: observable arrays
-    //todo to update from json in model http://knockoutjs.com/documentation/json-data.html
-    self.allAreas = ko.observableArray([]);
-    //todo to push to json to model http://knockoutjs.com/documentation/json-data.html
-//end: observable arrays
-
 };
 
-//start: classes
+//contains helper functions
+var help = {
+    //compares two strings and returns true if any part matchs
+    stringContains: function(string, contains) {
+        string = string || "";
+        return string.includes(contains);
+    },
+    //loops through urlArray and assembles the string
+    //todo anonymize and make modular
+    assembleUrl: function() {
+        for (var i = 0; i < urlArray.length; i++) {
+            var parameter = urlArray[i];
+            if (i === 0) {
+                url = urlArray[i];
+            } else if (i === 1) {
+                url = url + '?' + parameter;
+            } else {
+                url = url + '&' + parameter;
+            }
+        }
+    },
+    //sends a CORS request to a 3rd party
+    //todo anonymize and make modular
+    sendRequest: function(url) {
+        var foursquare = new XMLHttpRequest();
 
-    //class for locations which are stored in areas
-    var Location = function(address, nickname) {
-        this.address = address;
-        this.nickname = nickname;
-    };
+        foursquare.addEventListener('load', transferComplete);
+        foursquare.addEventListener('error', transferFailed);
+        foursquare.addEventListener('abort', transferFailed);
 
-    Location.prototype.gMaps = [];
+        foursquare.onreadystatechange = function() {
+            if (this.readyState === 4 && this.status === 200) {
 
-    //this is the class for most of our view models to be created
-    var Area = function(nickname, generatedName) {
-        this.nickname = nickname;
-        this.generatedName = generatedName;
-    };
+            }
+        };
 
-    Area.prototype.gMaps = [];
+        foursquare.open('GET', 'https://api.foursquare.com/v2/');
 
-    Area.prototype.locations = ko.observableArray([]);
+        function transferComplete(evt) {
+            console.log('transfer complete');
+        }
 
-//end: classes
+        function transferFailed(evt) {
+            console.log('transfer failed');
+        }
+    }
+};
 
 var model = {
-    //todo for converting from observables to json http://knockoutjs.com/documentation/json-data.html
+    //location class used within viewmodel
+    Location: function(data) {
+        var self = this;
+
+        //how to do error handling here?
+        self.nickname = data.nickname;
+        self.formalName = data.formalName;
+        self.address = data.address;
+        self.query = data.query;
+
+        if (data.ll !== undefined) {
+            self.ll = data.ll;
+        } else {
+            self.geocode(query);
+        }
+    },
 };
 
-ko.applyBindings(viewModel);
+model.Location.prototype.geocode = function(query) {
+    //todo add geocode ajax call to google.maps.geocode
+    console.log("geocode success")
+};
 
+var vm = new ViewModel();
 
+//when map loads applys bindings
+var initVM = function() {
+    //todo if($localStorage === undefined) //if new user
+    //todo GET json from web server
+    ko.applyBindings(vm);
 
+    for (var i = 0; i < defaultData.locations.length; i++) {
+        vm.locationArray.push(defaultData.locations[i]);
+    }
+    //todo else
+    //ko.applyBindings($localStorage)
+};
