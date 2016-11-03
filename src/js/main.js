@@ -47,6 +47,7 @@ var ViewModel = function() {
     //todo add snackbar alerts for items not loading
     //https://getmdl.io/components/index.html#snackbar-section
     //https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
+    //todo add website tour http://github.hubspot.com/shepherd/docs/welcome/
     self.alert = function() {
 
     };
@@ -118,16 +119,17 @@ var ViewModel = function() {
         allMarkers = [];
 
         //called within a for loop to create a closure
-        var createMarker = function(location) {
+        var createMarker = function(location, indexOf) {
             var marker = new google.maps.Marker({
                 position: location.ll,
                 map: map,
-                title: location.nickname
+                title: location.nickname,
+                indexOf: indexOf
             });
             //I have no idea why this solution worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
             google.maps.event.addListener(marker, 'click', function() {
                 var title = marker.title;
-                infowindow.setContent(title);
+                infowindow.setContent();
                 infowindow.open(map, marker);
             });
             //marker.addListener('click', setInfoWindow(marker));
@@ -135,7 +137,7 @@ var ViewModel = function() {
         };
 
         for (var i = 0; i < vm.filteredLocations().length; i++) {
-            createMarker(vm.filteredLocations()[i]);
+            createMarker(vm.filteredLocations()[i], i);
         }
 
         function setMapOnAll(map) {
@@ -192,14 +194,31 @@ var help = {
             console.log('transfer failed');
         }
     }
-}
+};
 
 var model = {
     //location class used within viewmodel
-    Location: function(address) {
-        this.address = address
-    }
-}
+    Location: function(data) {
+        var self = this;
+
+        //how to do error handling here?
+        self.nickname = data.nickname;
+        self.formalName = data.formalName;
+        self.address = data.address;
+        self.query = data.query;
+
+        if (data.ll !== undefined) {
+            self.ll = data.ll;
+        } else {
+            self.geocode(query);
+        }
+    },
+};
+
+model.Location.prototype.geocode = function(query) {
+    //todo add geocode ajax call to google.maps.geocode
+    console.log("geocode success")
+};
 
 var vm = new ViewModel();
 
