@@ -44,10 +44,11 @@ var ViewModel = function() {
         {'default': new Area()}
     ]);*/
 
-    //todo add snackbar alerts for items not loading
     //https://getmdl.io/components/index.html#snackbar-section
     //https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
     //todo add website tour http://github.hubspot.com/shepherd/docs/welcome/
+
+    //todo add snackbar alerts for items not loading
     self.alert = function() {
 
     };
@@ -58,39 +59,29 @@ var ViewModel = function() {
             map.setCenter(mapArea);
         } else {
             map.setZoom(15);
-            map.setCenter(newLocation.address.geometry.location);
+            map.setCenter(newLocation.place.ll);
         }
-    };
-
-    //function called when a location is being added
-    self.newLocation = function(address, nickname) {
-        var obj = {};
-        obj['nickname'] = nickname;
-        obj['placeInfo'] = new Location(address);
-
-        //push the newLocation to locationArray 
-        self.locationArray.push(obj);
     };
 
     //gets foursquare data for infowindow
     self.getFoursquare = function(location) {
-        var url;
-        var urlArray = [];
+        //change to array of strings then push dynamic parts to array
+        var foursquareURL = [
+            'https://api.foursquare.com/v2/venues/search',
+            'client_id=1XFTFIOZPBXBW2LAFUBE3IQSVXPNOOWQJXFX0N5JUUTVORF5',
+            //how to hide or not use this since this app is client side only atm?
+            'client_secret=DAV55HOOCPAE4LVQY34K3RIHMRSUF4H15XD4GG0UZ4CF2L4N',
+            'intent=match',
+            'v=20140806',
+            'm=foursquare'
+        ];
 
-        var venuesSearch = 'https://api.foursquare.com/v2/venues/search';
-        var client_id = 'client_id=1XFTFIOZPBXBW2LAFUBE3IQSVXPNOOWQJXFX0N5JUUTVORF5';
-        //how to hide or not use this since this app is client side only atm?
-        var client_secret = 'client_secret=DAV55HOOCPAE4LVQY34K3RIHMRSUF4H15XD4GG0UZ4CF2L4N';
-        var near = location.address.formatted_address.replace(/\s+/g, '+'); //'near=Austin,+TX';
-        //replaces spaces with + for url friendly format
-        //var query = location.address.formatted_address.replace(/\s+/g, '+');
-        var intent = 'intent=match';
-        var version = 'v=20140806';
-        var model = 'm=foursquare';
+        var near = location.place.address.replace(/\s+/g, '+'); //'near=Austin,+TX';
 
-        urlArray.push(venuesSearch, client_id, client_secret, near, version, model);
+        foursquareURL.push(near);
 
-        help.assembleUrl();
+        var url = help.assembleUrl(foursquareURL);
+        console.log(url);
         help.sendRequest();
     };
 
@@ -102,7 +93,7 @@ var ViewModel = function() {
             return self.locationArray();
         } else {
             return ko.utils.arrayFilter(self.locationArray(), function(Location) {
-                return help.stringContains(Location.nickname.toLowerCase(), filter);
+                return help.stringContains(Location.place.nickname.toLowerCase(), filter);
             });
         }
     });
@@ -121,15 +112,15 @@ var ViewModel = function() {
         //called within a for loop to create a closure
         var createMarker = function(location, indexOf) {
             var marker = new google.maps.Marker({
-                position: location.ll,
+                position: location.place.ll,
                 map: map,
-                title: location.nickname,
+                title: location.place.nickname,
                 indexOf: indexOf
             });
             //I have no idea why this solution worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
             google.maps.event.addListener(marker, 'click', function() {
                 var title = marker.title;
-                infowindow.setContent();
+                infowindow.setContent(title);
                 infowindow.open(map, marker);
             });
             //marker.addListener('click', setInfoWindow(marker));
@@ -155,11 +146,12 @@ var help = {
         string = string || "";
         return string.includes(contains);
     },
-    //loops through urlArray and assembles the string
-    //todo anonymize and make modular
-    assembleUrl: function() {
+    //loops through an array and assembles the string to http standards
+    assembleUrl: function(urlArray) {
+        var url;
+        var parameter;
         for (var i = 0; i < urlArray.length; i++) {
-            var parameter = urlArray[i];
+            parameter = urlArray[i];
             if (i === 0) {
                 url = urlArray[i];
             } else if (i === 1) {
@@ -168,6 +160,7 @@ var help = {
                 url = url + '&' + parameter;
             }
         }
+        return url;
     },
     //sends a CORS request to a 3rd party
     //todo anonymize and make modular
@@ -184,7 +177,7 @@ var help = {
             }
         };
 
-        foursquare.open('GET', 'https://api.foursquare.com/v2/');
+        foursquare.open('GET', url);
 
         function transferComplete(evt) {
             console.log('transfer complete');
@@ -207,17 +200,38 @@ var model = {
         self.address = data.address;
         self.query = data.query;
 
+        //todo check if within 5mi of area
+        //https://developers.google.com/maps/documentation/javascript/reference#spherical
         if (data.ll !== undefined) {
             self.ll = data.ll;
         } else {
             self.geocode(query);
         }
     },
+    //function called when a new location is being added
+    newLocation: function(isDefault, query, nickname) {
+        var data;
+        if (isDefault !== false && isDefault !== undefined) {
+            data = isDefault;
+        } else if (isDefault === false) {
+            //todo assemble data object based on query and nickname 
+            //possibly call geocode here before push to locationArray?
+        } else {
+            //todo add alert link in
+            console.log('error in newLocation()');
+        }
+
+        //wrapper obj to push to array
+        var obj = {};
+        obj.place = new model.Location(data);
+
+        vm.locationArray.push(obj);
+    }
 };
 
 model.Location.prototype.geocode = function(query) {
     //todo add geocode ajax call to google.maps.geocode
-    console.log("geocode success")
+    console.log("geocode not set update");
 };
 
 var vm = new ViewModel();
@@ -229,7 +243,7 @@ var initVM = function() {
     ko.applyBindings(vm);
 
     for (var i = 0; i < defaultData.locations.length; i++) {
-        vm.locationArray.push(defaultData.locations[i]);
+        model.newLocation(defaultData.locations[i]);
     }
     //todo else
     //ko.applyBindings($localStorage)

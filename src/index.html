@@ -42,7 +42,7 @@
                 <label class="mdl-textfield__label" for="filter"><i class="material-icons search-icon">search</i></label>
             </div>
             <nav class="mdl-navigation" data-bind="foreach: filteredLocations">
-                <a class="mdl-navigation__link" href="#" data-bind="text: $data.nickname, click: function() { $root.mapFocus($data) }"></a>
+                <a class="mdl-navigation__link" href="#" data-bind="text: $data.place.nickname, click: function() { $root.mapFocus($data) }"></a>
             </nav>
         </div>
         <main class="mdl-layout__content contentArea">
