@@ -4,6 +4,7 @@
 //todo update to be based on state machine and add markers dynamically
 var map;
 var infowindow;
+var vm;
 
 //this initializes the google map on the page to load async
 function initMap() {
@@ -30,14 +31,39 @@ var mapArea = {
 var ViewModel = function() {
     var self = this;
 
+
+    //text filter from user
     self.filter = ko.observable('');
     //stores all locations
     self.locationArray = ko.observableArray([]);
 
     //used for temporary storage of markers
-    self.allMarkers = [];
+    self.activeMarkers = [];
 
-    //todo add current object and state machine
+    self.mapFocus = function(newLocation) {
+        if (newLocation === 'Austin') {
+            map.setZoom(14);
+            map.panTo(mapArea);
+            infowindow.close();
+        } else {
+            map.setZoom(15);
+            map.panTo(newLocation.place.ll);
+        }
+    };
+
+    //accepts a locationArray index from click events on the location list
+    self.currentLocation = ko.observable();
+
+    self.stateMachine = ko.computed(function() {
+        //location tracking
+        if (self.currentLocation() !== undefined) {
+            //changes map zoom and center
+            self.mapFocus(self.currentLocation());
+
+            //triggers the locations infowindow to open on its marker
+            var trigger = new google.maps.event.trigger(vm.currentLocation().place.marker, 'click');
+        }
+    });
 
     //todo implement areas
     /*var allAreas = ko.observableArray([
@@ -53,19 +79,9 @@ var ViewModel = function() {
 
     };
 
-    self.mapFocus = function(newLocation) {
-        if (newLocation === 'Austin') {
-            map.setZoom(14);
-            map.setCenter(mapArea);
-        } else {
-            map.setZoom(15);
-            map.setCenter(newLocation.place.ll);
-        }
-    };
-
-    //gets foursquare data for infowindow
+    //todo figure out ajax loading possibly this http://www.knockmeout.net/2011/06/lazy-loading-observable-in-knockoutjs.html
+    //formats then sends a request to the foursquare api
     self.getFoursquare = function(location) {
-        //change to array of strings then push dynamic parts to array
         var foursquareURL = [
             'https://api.foursquare.com/v2/venues/search',
             'client_id=1XFTFIOZPBXBW2LAFUBE3IQSVXPNOOWQJXFX0N5JUUTVORF5',
@@ -82,8 +98,13 @@ var ViewModel = function() {
 
         var url = help.assembleUrl(foursquareURL);
         console.log(url);
-        help.sendRequest();
+        help.sendRequest(url);
     };
+
+    //takes foursquare json and formats it to be displayed in the infowindow
+    self.formatedFoursquare = ko.computed(function() {
+
+    });
 
     //computed observable to filter locations based on user input
     self.filteredLocations = ko.computed(function() {
@@ -100,47 +121,40 @@ var ViewModel = function() {
 
     //tells setMarkers to update when filteredLocations changes
     self.filteredLocations.subscribe(function(newValue) {
-        self.setMarkers();
+        self.displayMarkers();
     });
 
     //displays markers based on filteredLocations
-    self.setMarkers = function() {
-        setMapOnAll(null);
-
-        allMarkers = [];
-
-        //called within a for loop to create a closure
-        var createMarker = function(location, indexOf) {
-            var marker = new google.maps.Marker({
-                position: location.place.ll,
-                map: map,
-                title: location.place.nickname,
-                indexOf: indexOf
-            });
-            //I have no idea why this solution worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
-            google.maps.event.addListener(marker, 'click', function() {
-                var title = marker.title;
-                infowindow.setContent(title);
-                infowindow.open(map, marker);
-            });
-            //marker.addListener('click', setInfoWindow(marker));
-            allMarkers.push(marker);
+    self.displayMarkers = function() {
+        var clearMarkers = function() {
+            for (var i = 0; i < self.locationArray().length; i++) {
+                self.locationArray()[i].place.marker.setMap(null);
+            }
         };
 
-        for (var i = 0; i < vm.filteredLocations().length; i++) {
-            createMarker(vm.filteredLocations()[i], i);
-        }
-
-        function setMapOnAll(map) {
-            for (var i = 0; i < self.allMarkers.length; i++) {
-                self.allMarkers[i].setMap(map);
+        var display = function() {
+            for (var i = 0; i < vm.filteredLocations().length; i++) {
+                self.filteredLocations()[i].place.marker.setMap(map);
             }
-        }
+        };
+
+        clearMarkers();
+        display();
     };
 };
 
 //contains helper functions
 var help = {
+    status: function(firstOption, secondOption) {
+        if (firstOption !== undefined) {
+            return firstOption;
+        } else if (secondOption !== undefined) {
+            return secondOption;
+        } else {
+            //change to use alert
+            return 'error loading resource';
+        }
+    },
     //compares two strings and returns true if any part matchs
     stringContains: function(string, contains) {
         string = string || "";
@@ -224,6 +238,7 @@ var model = {
         //wrapper obj to push to array
         var obj = {};
         obj.place = new model.Location(data);
+        obj.place.createMarker();
 
         vm.locationArray.push(obj);
     }
@@ -231,14 +246,30 @@ var model = {
 
 model.Location.prototype.geocode = function(query) {
     //todo add geocode ajax call to google.maps.geocode
-    console.log("geocode not set update");
+    console.log("geocode not setup");
 };
 
-var vm = new ViewModel();
+model.Location.prototype.createMarker = function() {
+    var self = this;
+    self.marker = new google.maps.Marker({
+        position: self.ll,
+        map: map,
+        title: self.nickname
+    });
+    //I have no idea why this solution worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
+    google.maps.event.addListener(self.marker, 'click', function() {
+        var title = self.marker.title;
+        self.marker.setAnimation(google.maps.Animation.DROP);
+        //todo google.maps.InfoWindow.setContent(help.status(self.currentLocation().place.foursquare, self.currentLocation().place.nickname));
+        infowindow.setContent(title);
+        infowindow.open(map, self.marker);
+    });
+};
 
 //when map loads applys bindings
 var initVM = function() {
     //todo if($localStorage === undefined) //if new user
+    vm = new ViewModel();
     //todo GET json from web server
     ko.applyBindings(vm);
 

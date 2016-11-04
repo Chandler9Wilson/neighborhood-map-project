@@ -15,8 +15,8 @@ mdl-textfield__input {
     padding: 20px;
 }
 
-#map { 
-    height: 100%; 
+#map {
+    height: 100%;
 }
 
 .contentArea {
@@ -34,9 +34,17 @@ dialog {
     z-index: 20;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     height: 100%;
     width: 100%;
+}
+
+.navigation-title {
+    font-size: 20px;
+    font-weight: 500;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    letter-spacing: 0.02em;
 }
