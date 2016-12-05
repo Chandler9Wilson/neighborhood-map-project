@@ -1,17 +1,14 @@
 //todo add modular loading with require js http://knockoutjs.com/documentation/amd-loading.html
 
 //map init and starting coords
-//todo update to be based on state machine and add markers dynamically
 var map;
 var infowindow;
 var vm;
 
 //this initializes the google map on the page to load async
 function initMap() {
-    var lat = mapArea.lat;
-    var lng = mapArea.lng;
     map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat, lng },
+        center: mapArea,
         zoom: 14
             //todo change control defaults to prevent interference with new location button
             //https://developers.google.com/maps/documentation/javascript/controls#Adding_Controls_to_the_Map
@@ -36,6 +33,10 @@ var ViewModel = function() {
     self.filter = ko.observable('');
     //stores all locations
     self.locationArray = ko.observableArray([]);
+
+    self.test = function() {
+        console.log('bs');
+    };
 
     //used for temporary storage of markers
     self.activeMarkers = [];
@@ -70,35 +71,13 @@ var ViewModel = function() {
         {'default': new Area()}
     ]);*/
 
-    //https://getmdl.io/components/index.html#snackbar-section
-    //https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
     //todo add website tour http://github.hubspot.com/shepherd/docs/welcome/
 
     //todo add snackbar alerts for items not loading
+    //https://getmdl.io/components/index.html#snackbar-section
+    //https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
     self.alert = function() {
 
-    };
-
-    //todo figure out ajax loading possibly this http://www.knockmeout.net/2011/06/lazy-loading-observable-in-knockoutjs.html
-    //formats then sends a request to the foursquare api
-    self.getFoursquare = function(location) {
-        var foursquareURL = [
-            'https://api.foursquare.com/v2/venues/search',
-            'client_id=1XFTFIOZPBXBW2LAFUBE3IQSVXPNOOWQJXFX0N5JUUTVORF5',
-            //how to hide or not use this since this app is client side only atm?
-            'client_secret=DAV55HOOCPAE4LVQY34K3RIHMRSUF4H15XD4GG0UZ4CF2L4N',
-            'intent=match',
-            'v=20140806',
-            'm=foursquare'
-        ];
-
-        var near = location.place.address.replace(/\s+/g, '+'); //'near=Austin,+TX';
-
-        foursquareURL.push(near);
-
-        var url = help.assembleUrl(foursquareURL);
-        console.log(url);
-        help.sendRequest(url);
     };
 
     //takes foursquare json and formats it to be displayed in the infowindow
@@ -126,12 +105,14 @@ var ViewModel = function() {
 
     //displays markers based on filteredLocations
     self.displayMarkers = function() {
+        //sets the map property off all markers to null
         var clearMarkers = function() {
             for (var i = 0; i < self.locationArray().length; i++) {
                 self.locationArray()[i].place.marker.setMap(null);
             }
         };
 
+        //sets the map property of filtered locations to map
         var display = function() {
             for (var i = 0; i < vm.filteredLocations().length; i++) {
                 self.filteredLocations()[i].place.marker.setMap(map);
@@ -214,6 +195,15 @@ var model = {
         self.address = data.address;
         self.query = data.query;
 
+        self.rawFoursquare = ko.observable();
+        self.formattedFoursquare = ko.computed(function() {
+            //todo converts rawFoursquare into an html template when rawFoursquare is returned
+        });
+        self.foursquare = ko.computed(function() {
+            //todo returns loading animation or formattedFoursquare
+        });
+
+
         //todo check if within 5mi of area
         //https://developers.google.com/maps/documentation/javascript/reference#spherical
         if (data.ll !== undefined) {
@@ -223,7 +213,7 @@ var model = {
         }
     },
     //function called when a new location is being added
-    newLocation: function(isDefault, query, nickname) {
+    newLocation: function(isDefault, cb, query, nickname) {
         var data;
         if (isDefault !== false && isDefault !== undefined) {
             data = isDefault;
@@ -241,7 +231,7 @@ var model = {
         obj.place.createMarker();
 
         vm.locationArray.push(obj);
-    }
+    },
 };
 
 model.Location.prototype.geocode = function(query) {
@@ -256,18 +246,39 @@ model.Location.prototype.createMarker = function() {
         map: map,
         title: self.nickname
     });
-    //I have no idea why this solution worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
+    //I have no idea why this solutioatn worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
     google.maps.event.addListener(self.marker, 'click', function() {
-        var title = self.marker.title;
         self.marker.setAnimation(google.maps.Animation.DROP);
-        //todo google.maps.InfoWindow.setContent(help.status(self.currentLocation().place.foursquare, self.currentLocation().place.nickname));
-        infowindow.setContent(title);
+        infowindow.setContent(help.status(self.rawFoursquare(), self.marker.title));
         infowindow.open(map, self.marker);
     });
 };
 
+//formats url then sends GET request to foursquare and returns the result 
+model.Location.prototype.getFoursquare = function() {
+    //todo format url for get request then call help.sendRequest(GET)
+    var foursquareURL = [
+        'https://api.foursquare.com/v2/venues/search',
+        'client_id=1XFTFIOZPBXBW2LAFUBE3IQSVXPNOOWQJXFX0N5JUUTVORF5',
+        //how to hide or not use this since this app is client side only atm?
+        'client_secret=DAV55HOOCPAE4LVQY34K3RIHMRSUF4H15XD4GG0UZ4CF2L4N',
+        'intent=match',
+        'v=20140806',
+        'm=foursquare'
+    ];
+
+    var near = Location.place.ll.lat + ',' + Location.place.ll.lng;
+    var formalName = Location.place.formalName;
+
+    foursquareURL.push(near, formalName);
+
+    var url = help.assembleUrl(foursquareURL);
+    console.log(url);
+    help.sendRequest(url);
+};
+
 //when map loads applys bindings
-var initVM = function() {
+var initVM = function(ifDefault, callback) {
     //todo if($localStorage === undefined) //if new user
     vm = new ViewModel();
     //todo GET json from web server
