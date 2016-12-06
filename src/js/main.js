@@ -1,11 +1,9 @@
 //todo add modular loading with require js http://knockoutjs.com/documentation/amd-loading.html
-
-//map init and starting coords
 var map;
 var infowindow;
 var vm;
 
-//this initializes the google map on the page to load async
+//this initializes the google map on the page
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: mapArea,
@@ -15,7 +13,7 @@ function initMap() {
             //todo change the map space to change on rezise so that 15% of map is not off screen on desktop
     });
     infowindow = new google.maps.InfoWindow();
-    initVM();
+    initVM(model.foursquareDefault);
 }
 
 //initial map area used in initMap
@@ -181,6 +179,24 @@ var help = {
         function transferFailed(evt) {
             console.log('transfer failed');
         }
+    },
+    //checks an array for a provided object property,
+    //then returns the indexes that do not have that property
+    checkArray: function(array, objectChain, callback) {
+        var undefinedIndexes = [];
+
+        //array parameter needs to be from root namespace
+        for (var i = 0; i < array.length; i++) {
+            if (array[i].objectChain === undefined) {
+                undefinedIndexes.push(i);
+            }
+        }
+
+        if (callback !== undefined) {
+            return callback(null, undefinedIndexes);
+        } else {
+            return undefinedIndexes;
+        }
     }
 };
 
@@ -213,7 +229,7 @@ var model = {
         }
     },
     //function called when a new location is being added
-    newLocation: function(isDefault, cb, query, nickname) {
+    newLocation: function(isDefault, info, pushTo) {
         var data;
         if (isDefault !== false && isDefault !== undefined) {
             data = isDefault;
@@ -230,8 +246,16 @@ var model = {
         obj.place = new model.Location(data);
         obj.place.createMarker();
 
-        vm.locationArray.push(obj);
+        pushTo.push(obj);
     },
+    //adds foursquare data to the default locations
+    foursquareDefault: function(err, destination) {
+        if (err) {
+            return console.error(err);
+        }
+
+
+    }
 };
 
 model.Location.prototype.geocode = function(query) {
@@ -278,15 +302,19 @@ model.Location.prototype.getFoursquare = function() {
 };
 
 //when map loads applys bindings
-var initVM = function(ifDefault, callback) {
+var initVM = function(callback) {
     //todo if($localStorage === undefined) //if new user
     vm = new ViewModel();
     //todo GET json from web server
     ko.applyBindings(vm);
 
+    var destination = vm.locationArray;
+
     for (var i = 0; i < defaultData.locations.length; i++) {
-        model.newLocation(defaultData.locations[i]);
+        model.newLocation(defaultData.locations[i], undefined, destination);
     }
     //todo else
     //ko.applyBindings($localStorage)
+
+    return callback(null, destination);
 };
