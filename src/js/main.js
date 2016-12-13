@@ -13,7 +13,7 @@ function initMap() {
             //todo change the map space to change on rezise so that 15% of map is not off screen on desktop
     });
     infowindow = new google.maps.InfoWindow();
-    initVM(model.foursquareDefault);
+    initVM(model.addFoursquare);
 }
 
 //initial map area used in initMap
@@ -158,45 +158,32 @@ var help = {
     //sends a CORS request to a 3rd party
     //todo anonymize and make modular
     sendRequest: function(url) {
-        var foursquare = new XMLHttpRequest();
+        var request = new XMLHttpRequest();
 
-        foursquare.addEventListener('load', transferComplete);
-        foursquare.addEventListener('error', transferFailed);
-        foursquare.addEventListener('abort', transferFailed);
+        request.addEventListener('load', transferComplete);
+        request.addEventListener('error', transferFailed);
+        request.addEventListener('abort', transferFailed);
 
-        foursquare.onreadystatechange = function() {
-            if (this.readyState === 4 && this.status === 200) {
+        /* request.onreadystatechange = function() {
+             if (this.readyState === 4 && this.status === 200) {
 
-            }
-        };
+             }
+         };*/
 
-        foursquare.open('GET', url);
+        request.open('GET', url);
 
         function transferComplete(evt) {
-            console.log('transfer complete');
+            console.log(request.responseText);
         }
 
         function transferFailed(evt) {
             console.log('transfer failed');
         }
     },
-    //checks an array for a provided object property,
-    //then returns the indexes that do not have that property
-    checkArray: function(array, objectChain, callback) {
-        var undefinedIndexes = [];
+    replaceSpaces: function(string, changeTo) {
+        var spaceGenocide = string.replace(/\s+/g, changeTo);
 
-        //array parameter needs to be from root namespace
-        for (var i = 0; i < array.length; i++) {
-            if (array[i].objectChain === undefined) {
-                undefinedIndexes.push(i);
-            }
-        }
-
-        if (callback !== undefined) {
-            return callback(null, undefinedIndexes);
-        } else {
-            return undefinedIndexes;
-        }
+        return spaceGenocide;
     }
 };
 
@@ -248,13 +235,19 @@ var model = {
 
         pushTo.push(obj);
     },
-    //adds foursquare data to the default locations
-    foursquareDefault: function(err, destination) {
+    //adds foursquare data to all objects in vm.locationArray() this will delete current data
+    addFoursquare: function(err, destination) {
         if (err) {
             return console.error(err);
         }
 
+        var length = vm.locationArray().length;
 
+        for (var i = 0; i < length; i++) {
+            vm.locationArray()[i].place.rawFoursquare(undefined);
+
+            vm.locationArray()[i].place.getFoursquare();
+        }
     }
 };
 
@@ -280,6 +273,8 @@ model.Location.prototype.createMarker = function() {
 
 //formats url then sends GET request to foursquare and returns the result 
 model.Location.prototype.getFoursquare = function() {
+    var self = this;
+
     //todo format url for get request then call help.sendRequest(GET)
     var foursquareURL = [
         'https://api.foursquare.com/v2/venues/search',
@@ -291,8 +286,8 @@ model.Location.prototype.getFoursquare = function() {
         'm=foursquare'
     ];
 
-    var near = Location.place.ll.lat + ',' + Location.place.ll.lng;
-    var formalName = Location.place.formalName;
+    var near = 'll=' + self.ll.lat + ',' + self.ll.lng;
+    var formalName = 'query=' + help.replaceSpaces(self.formalName, '+');
 
     foursquareURL.push(near, formalName);
 
