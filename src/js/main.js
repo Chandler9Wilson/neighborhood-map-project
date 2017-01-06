@@ -8,9 +8,9 @@ function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: mapArea,
         zoom: 14
-            //todo change control defaults to prevent interference with new location button
-            //https://developers.google.com/maps/documentation/javascript/controls#Adding_Controls_to_the_Map
-            //todo change the map space to change on rezise so that 15% of map is not off screen on desktop
+        //todo change control defaults to prevent interference with new location button
+        //https://developers.google.com/maps/documentation/javascript/controls#Adding_Controls_to_the_Map
+        //todo change the map space to change on rezise so that 15% of map is not off screen on desktop
     });
     infowindow = new google.maps.InfoWindow();
     initVM(model.addFoursquare);
@@ -35,9 +35,6 @@ var ViewModel = function() {
     self.test = function() {
         console.log('bs');
     };
-
-    //used for temporary storage of markers
-    self.activeMarkers = [];
 
     self.mapFocus = function(newLocation) {
         if (newLocation === 'Austin') {
@@ -156,29 +153,26 @@ var help = {
         return url;
     },
     //sends a CORS request to a 3rd party
-    //todo anonymize and make modular
     sendRequest: function(url) {
         var request = new XMLHttpRequest();
 
-        request.addEventListener('load', transferComplete);
-        request.addEventListener('error', transferFailed);
-        request.addEventListener('abort', transferFailed);
+        request.ontimeout = function() {
+            console.error('Request timed out');
+        };
 
-        /* request.onreadystatechange = function() {
-             if (this.readyState === 4 && this.status === 200) {
-
-             }
-         };*/
+        request.onload = function() {
+            if (request.readyState === 4) {
+                if (request.status === 200) {
+                    console.log(this.responseText);
+                    console.log('hello')
+                } else {
+                    console.error(xhr.statusText);
+                }
+            }
+        };
 
         request.open('GET', url);
-
-        function transferComplete(evt) {
-            console.log(request.responseText);
-        }
-
-        function transferFailed(evt) {
-            console.log('transfer failed');
-        }
+        request.timeout = 5000;
     },
     replaceSpaces: function(string, changeTo) {
         var spaceGenocide = string.replace(/\s+/g, changeTo);
@@ -221,8 +215,8 @@ var model = {
         if (isDefault !== false && isDefault !== undefined) {
             data = isDefault;
         } else if (isDefault === false) {
-            //todo assemble data object based on query and nickname 
-            //possibly call geocode here before push to locationArray?
+            //todo assemble data object based on query and nickname
+            //possibly call geocode here before pushing to locationArray?
         } else {
             //todo add alert link in
             console.log('error in newLocation()');
@@ -271,7 +265,7 @@ model.Location.prototype.createMarker = function() {
     });
 };
 
-//formats url then sends GET request to foursquare and returns the result 
+//formats url then sends GET request to foursquare and returns the result
 model.Location.prototype.getFoursquare = function() {
     var self = this;
 
