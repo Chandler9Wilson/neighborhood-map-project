@@ -155,6 +155,9 @@ var help = {
     //sends a CORS request to a 3rd party
     sendRequest: function(url) {
         var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+
+        request.timeout = 2000;
 
         request.ontimeout = function() {
             console.error('Request timed out');
@@ -164,15 +167,13 @@ var help = {
             if (request.readyState === 4) {
                 if (request.status === 200) {
                     console.log(this.responseText);
-                    console.log('hello')
                 } else {
-                    console.error(xhr.statusText);
+                    console.error(this.statusText);
                 }
             }
         };
 
-        request.open('GET', url);
-        request.timeout = 5000;
+        request.send(null);
     },
     replaceSpaces: function(string, changeTo) {
         var spaceGenocide = string.replace(/\s+/g, changeTo);
