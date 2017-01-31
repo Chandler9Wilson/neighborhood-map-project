@@ -1,4 +1,3 @@
-//todo add modular loading with require js http://knockoutjs.com/documentation/amd-loading.html
 var map;
 var infowindow;
 var vm;
@@ -75,11 +74,6 @@ var ViewModel = function() {
 
     };
 
-    //takes foursquare json and formats it to be displayed in the infowindow
-    self.formatedFoursquare = ko.computed(function() {
-
-    });
-
     //computed observable to filter locations based on user input
     self.filteredLocations = ko.computed(function() {
         var filter = self.filter().toLowerCase();
@@ -150,10 +144,11 @@ var help = {
                 url = url + '&' + parameter;
             }
         }
+        //console.log(url);
         return url;
     },
     //sends a CORS request to a 3rd party
-    sendRequest: function(url) {
+    sendRequest: function(url, saveTo) {
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
 
@@ -166,7 +161,8 @@ var help = {
         request.onload = function() {
             if (request.readyState === 4) {
                 if (request.status === 200) {
-                    console.log(this.responseText);
+                    saveTo(JSON.parse(this.responseText));
+                    console.log(saveTo())
                 } else {
                     console.error(this.statusText);
                 }
@@ -195,10 +191,18 @@ var model = {
 
         self.rawFoursquare = ko.observable();
         self.formattedFoursquare = ko.computed(function() {
+            var parseData = {
+            }
             //todo converts rawFoursquare into an html template when rawFoursquare is returned
+            if (self.rawFoursquare) {
+
+            } else {
+                return undefined;
+            }
         });
         self.foursquare = ko.computed(function() {
             //todo returns loading animation or formattedFoursquare
+            return help.status(self.formattedFoursquare(), self.nickname);
         });
 
 
@@ -261,12 +265,12 @@ model.Location.prototype.createMarker = function() {
     //I have no idea why this solutioatn worked http://stackoverflow.com/questions/7110027/google-maps-issue-cannot-call-method-apply-of-undefined ??
     google.maps.event.addListener(self.marker, 'click', function() {
         self.marker.setAnimation(google.maps.Animation.DROP);
-        infowindow.setContent(help.status(self.rawFoursquare(), self.marker.title));
+        infowindow.setContent(self.foursquare());
         infowindow.open(map, self.marker);
     });
 };
 
-//formats url then sends GET request to foursquare and returns the result
+//formats url then sends a GET request to foursquare and returns the result
 model.Location.prototype.getFoursquare = function() {
     var self = this;
 
@@ -287,8 +291,7 @@ model.Location.prototype.getFoursquare = function() {
     foursquareURL.push(near, formalName);
 
     var url = help.assembleUrl(foursquareURL);
-    console.log(url);
-    help.sendRequest(url);
+    help.sendRequest(url, self.rawFoursquare);
 };
 
 //when map loads applys bindings
