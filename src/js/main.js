@@ -70,6 +70,7 @@ var ViewModel = function() {
     //todo add snackbar alerts for items not loading
     //https://getmdl.io/components/index.html#snackbar-section
     //https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
+
     self.alert = function() {
 
     };
@@ -191,11 +192,20 @@ var model = {
 
         self.rawFoursquare = ko.observable();
         self.formattedFoursquare = ko.computed(function() {
-            var parseData = {
-            }
             //todo converts rawFoursquare into an html template when rawFoursquare is returned
-            if (self.rawFoursquare) {
+            if (self.rawFoursquare()) {
+                console.log(self.rawFoursquare())
+                if (self.rawFoursquare().meta.code === 200) {
+                    var response = self.rawFoursquare().response.venues[0];
 
+                    var parsedFoursquare = {
+                        name: response.name,
+                        stats: response.stats
+                    };
+
+                    console.log(parsedFoursquare);
+                    return document.getElementById('marker');//JSON.stringify(parsedFoursquare);
+                }
             } else {
                 return undefined;
             }
