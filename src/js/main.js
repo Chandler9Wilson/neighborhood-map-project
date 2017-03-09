@@ -197,14 +197,18 @@ var model = {
                 console.log(self.rawFoursquare())
                 if (self.rawFoursquare().meta.code === 200) {
                     var response = self.rawFoursquare().response.venues[0];
+                    var foursquareURL = 'https://foursquare.com/v/' + response.id;
 
                     var parsedFoursquare = {
                         name: response.name,
                         stats: response.stats
                     };
 
+
+                    var string = "<h6> <a href='" + foursquareURL + "'>" + response.name + "</a></h6> <br /> <p> Checkins: " + response.stats.checkinsCount + "<br /> Users: " + response.stats.usersCount + "</p>";
+
                     console.log(parsedFoursquare);
-                    return document.getElementById('marker');//JSON.stringify(parsedFoursquare);
+                    return string;//JSON.stringify(parsedFoursquare);
                 }
             } else {
                 return undefined;
