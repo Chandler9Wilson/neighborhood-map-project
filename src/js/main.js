@@ -153,29 +153,17 @@ var help = {
         //console.log(url);
         return url;
     },
-    //sends a CORS request to a 3rd party
-    sendRequest: function(url, saveTo) {
-        var request = new XMLHttpRequest();
-        request.open('GET', url, true);
+    fetchRequest: function(url, saveTo) {
+        fetch(url, {
+            method: 'get'
+        }).then(function(response) {
+            //converst response to JSON
+            return response.json();
+        }).then(function(j) {
+            saveTo(j);
+        }).catch(function(err) {
 
-        request.timeout = 2000;
-
-        request.ontimeout = function() {
-            console.error('Request timed out');
-        };
-
-        request.onload = function() {
-            if (request.readyState === 4) {
-                if (request.status === 200) {
-                    saveTo(JSON.parse(this.responseText));
-                    //console.log(saveTo());
-                } else {
-                    console.error(this.statusText);
-                }
-            }
-        };
-
-        request.send(null);
+        });
     },
     replaceSpaces: function(string, changeTo) {
         var spaceGenocide = string.replace(/\s+/g, changeTo);
@@ -308,7 +296,7 @@ model.Location.prototype.getFoursquare = function() {
     foursquareURL.push(near, formalName);
 
     var url = help.assembleUrl(foursquareURL);
-    help.sendRequest(url, self.rawFoursquare);
+    help.fetchRequest(url, self.rawFoursquare);
 };
 
 //when map loads applys bindings
