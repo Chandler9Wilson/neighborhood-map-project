@@ -57,6 +57,11 @@
         </main>
     </div>
 
+    <div aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button type="button" class="mdl-snackbar__action"></button>
+    </div>
+
     <!--start various modals-->
     <dialog id="newArea" class="mdl-dialog">
         <h3 class="mdl-dialog__title">New Area</h3>
@@ -98,10 +103,6 @@
             <button type="button" class="mdl-button">Cancel</button>
         </div>
     </dialog>
-
-    <template id="marker">
-        <h1>Hello World</h1>
-    </template>
 
     <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
     <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>

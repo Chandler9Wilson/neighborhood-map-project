@@ -16,8 +16,7 @@ function initMap() {
 }
 
 var failMap = function() {
-    //TODO call the snackbar seperatly from vm with error message
-    console.log("error loading google maps");
+    help.errorNotification('error loading google maps')
 };
 
 //initial map area used in initMap
@@ -157,13 +156,29 @@ var help = {
         fetch(url, {
             method: 'get'
         }).then(function(response) {
-            //converst response to JSON
-            return response.json();
-        }).then(function(j) {
-            saveTo(j);
+            if (response.ok) {
+                //converst response to JSON
+                return response.json();
+            } else {
+                help.errorNotification('query to foursquare failed')
+                console.error('query to foursquare failed');
+            }
+        }).then(function(data) {
+            saveTo(data);
         }).catch(function(err) {
-
+            help.errorNotification(err);
         });
+    },
+    errorNotification: function(err) {
+        window.onload = function() {
+            var notification = document.querySelector('.mdl-js-snackbar')
+
+            notification.MaterialSnackbar.showSnackbar(
+                {
+                    message: err
+                }
+            );
+        }
     },
     replaceSpaces: function(string, changeTo) {
         var spaceGenocide = string.replace(/\s+/g, changeTo);
