@@ -16,7 +16,7 @@ function initMap() {
 }
 
 var failMap = function() {
-    help.errorNotification('error loading google maps')
+    help.errorNotification('error loading google maps');
 };
 
 //initial map area used in initMap
@@ -160,7 +160,7 @@ var help = {
                 //converst response to JSON
                 return response.json();
             } else {
-                help.errorNotification('query to foursquare failed')
+                help.errorNotification('query to foursquare failed');
                 console.error('query to foursquare failed');
             }
         }).then(function(data) {
@@ -171,14 +171,14 @@ var help = {
     },
     errorNotification: function(err) {
         window.onload = function() {
-            var notification = document.querySelector('.mdl-js-snackbar')
+            var notification = document.querySelector('.mdl-js-snackbar');
 
             notification.MaterialSnackbar.showSnackbar(
                 {
                     message: err
                 }
             );
-        }
+        };
     },
     replaceSpaces: function(string, changeTo) {
         var spaceGenocide = string.replace(/\s+/g, changeTo);
