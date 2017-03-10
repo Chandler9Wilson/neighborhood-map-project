@@ -15,6 +15,11 @@ function initMap() {
     initVM(model.addFoursquare);
 }
 
+var failMap = function() {
+    //TODO call the snackbar seperatly from vm with error message
+    console.log("error loading google maps");
+};
+
 //initial map area used in initMap
 var mapArea = {
     lat: 30.284301,
@@ -128,7 +133,7 @@ var help = {
     },
     //compares two strings and returns true if any part matchs
     stringContains: function(string, contains) {
-        string = string || "";
+        string = string || '';
         return string.includes(contains);
     },
     //loops through an array and assembles the string to http standards
@@ -163,7 +168,7 @@ var help = {
             if (request.readyState === 4) {
                 if (request.status === 200) {
                     saveTo(JSON.parse(this.responseText));
-                    console.log(saveTo())
+                    //console.log(saveTo());
                 } else {
                     console.error(this.statusText);
                 }
@@ -194,7 +199,7 @@ var model = {
         self.formattedFoursquare = ko.computed(function() {
             //todo converts rawFoursquare into an html template when rawFoursquare is returned
             if (self.rawFoursquare()) {
-                console.log(self.rawFoursquare())
+                //console.log(self.rawFoursquare());
                 if (self.rawFoursquare().meta.code === 200) {
                     var response = self.rawFoursquare().response.venues[0];
                     var foursquareURL = 'https://foursquare.com/v/' + response.id;
@@ -288,11 +293,9 @@ model.Location.prototype.createMarker = function() {
 model.Location.prototype.getFoursquare = function() {
     var self = this;
 
-    //todo format url for get request then call help.sendRequest(GET)
     var foursquareURL = [
         'https://api.foursquare.com/v2/venues/search',
         'client_id=1XFTFIOZPBXBW2LAFUBE3IQSVXPNOOWQJXFX0N5JUUTVORF5',
-        //how to hide or not use this since this app is client side only atm?
         'client_secret=DAV55HOOCPAE4LVQY34K3RIHMRSUF4H15XD4GG0UZ4CF2L4N',
         'intent=match',
         'v=20140806',
